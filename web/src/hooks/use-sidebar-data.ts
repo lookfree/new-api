@@ -34,6 +34,7 @@ import {
   User,
   Users,
   Wallet,
+  Gift,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
@@ -108,6 +109,11 @@ export function useSidebarData(): SidebarData {
             title: t('Wallet'),
             url: '/wallet',
             icon: Wallet,
+          },
+          {
+            title: t('Refer & earn'),
+            url: '/invite',
+            icon: Gift,
           },
           {
             title: t('Profile'),

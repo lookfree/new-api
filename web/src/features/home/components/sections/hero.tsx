@@ -19,12 +19,19 @@ For commercial licensing, please contact support@quantumnous.com
 import { CherryStudio } from '@lobehub/icons'
 import { Link } from '@tanstack/react-router'
 import { ArrowRight, BookOpen } from 'lucide-react'
+import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/components/ui/button'
+import { SampleTabs } from '@/features/docs/components/sample-tabs'
+import { resolveApiBaseUrl } from '@/features/docs/lib/base-url'
+import {
+  buildCallSamples,
+  FALLBACK_SAMPLE_MODEL,
+} from '@/features/docs/lib/samples'
 import { useStatus } from '@/hooks/use-status'
 
-import { HeroTerminalDemo } from '../hero-terminal-demo'
+import { HeroStats } from './stats'
 
 interface HeroProps {
   className?: string
@@ -48,6 +55,13 @@ const MoreIcon = () => (
 export function Hero(props: HeroProps) {
   const { t } = useTranslation()
   const { status } = useStatus()
+
+  // The hero's call example points at this deployment, so a visitor can copy
+  // it before they even have an account.
+  const heroSamples = useMemo(
+    () => buildCallSamples(resolveApiBaseUrl(status), FALLBACK_SAMPLE_MODEL),
+    [status]
+  )
   const docsUrl =
     (status?.docs_link as string | undefined) || 'https://docs.newapi.pro'
 
@@ -169,6 +183,11 @@ export function Hero(props: HeroProps) {
             )}
           </div>
 
+          <HeroStats
+            className='landing-animate-fade-up mt-10 grid max-w-md grid-cols-2 gap-5 opacity-0 sm:grid-cols-4'
+            style={{ animationDelay: '210ms' }}
+          />
+
           {/* Supported Apps (参考图二样式，进行卡片化和信息扩充设计，增加视觉高度) */}
           <div
             className='landing-animate-fade-up mt-10 w-full max-w-xl opacity-0'
@@ -216,7 +235,7 @@ export function Hero(props: HeroProps) {
                 />
                 <span
                   style={{ display: 'none' }}
-                  className='size-6 shrink-0 items-center justify-center rounded-md bg-blue-500/10 text-[10px] font-bold text-blue-600 dark:bg-blue-400/10 dark:text-blue-400'
+                  className='bg-primary/10 text-primary size-6 shrink-0 items-center justify-center rounded-md text-[10px] font-bold'
                 >
                   CC
                 </span>
@@ -232,12 +251,12 @@ export function Hero(props: HeroProps) {
           </div>
         </div>
 
-        {/* Right Column: Hero Terminal API Demo */}
+        {/* Right Column: call example, matching the Zetone prototype's hero. */}
         <div
-          className='landing-animate-fade-up flex w-full justify-center opacity-0 lg:col-span-6'
+          className='landing-animate-fade-up mt-8 w-full opacity-0 lg:col-span-6 lg:mt-0'
           style={{ animationDelay: '320ms' }}
         >
-          <HeroTerminalDemo className='mt-8 lg:mt-0' />
+          <SampleTabs samples={heroSamples} />
         </div>
       </div>
     </section>

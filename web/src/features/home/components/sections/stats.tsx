@@ -94,15 +94,45 @@ interface StatItem {
   decimals?: number
 }
 
-export function Stats(_props: StatsProps) {
+function useStatItems(): StatItem[] {
   const { t } = useTranslation()
-
-  const stats: StatItem[] = [
+  return [
     { end: 50, suffix: '+', label: t('upstream services integrated') },
     { end: 100, suffix: '+', label: t('model billing support') },
     { end: 50, suffix: '+', label: t('compatible API routes') },
     { end: 10, suffix: '+', label: t('scheduling controls') },
   ]
+}
+
+/**
+ * Compact, left-aligned variant that sits inside the hero's left column,
+ * where the Zetone prototype places these figures. Shares the counter and the
+ * figures themselves with the full-width band below.
+ */
+export function HeroStats(props: {
+  className?: string
+  style?: React.CSSProperties
+}) {
+  const stats = useStatItems()
+
+  return (
+    <dl className={props.className} style={props.style}>
+      {stats.map((s) => (
+        <div key={s.label}>
+          <dt className='text-foreground text-2xl font-bold tracking-tight'>
+            <Counter end={s.end} suffix={s.suffix} decimals={s.decimals} />
+          </dt>
+          <dd className='text-muted-foreground mt-1 text-xs leading-snug'>
+            {s.label}
+          </dd>
+        </div>
+      ))}
+    </dl>
+  )
+}
+
+export function Stats(_props: StatsProps) {
+  const stats = useStatItems()
 
   return (
     <div className='border-border/40 bg-muted/10 relative z-10 border-y'>

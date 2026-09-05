@@ -338,6 +338,7 @@ func InitResources() error {
 	// Repair out-of-range SMS values loaded from the options table before any
 	// request can read them.
 	system_setting.NormalizeSMSSettings()
+	system_setting.NormalizeAffiliateSettings()
 
 	// 清理旧的磁盘缓存文件
 	common.CleanupOldCacheFiles()

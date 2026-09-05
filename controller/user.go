@@ -1578,3 +1578,25 @@ func UpdateUserSetting(c *gin.Context) {
 
 	common.ApiSuccessI18n(c, i18n.MsgSettingSaved, nil)
 }
+
+// GetAffRecords lists the people the signed-in user invited, along with what
+// each of them has topped up and earned them so far.
+//
+// The user id comes from the session rather than a parameter, so one inviter
+// cannot read another's referral list. Invitee contact details are masked in
+// the model layer before they reach here.
+func GetAffRecords(c *gin.Context) {
+	limit, _ := strconv.Atoi(c.Query("limit"))
+	offset, _ := strconv.Atoi(c.Query("offset"))
+
+	records, total, err := model.GetAffRecords(c.GetInt("id"), limit, offset)
+	if err != nil {
+		common.ApiError(c, err)
+		return
+	}
+
+	common.ApiSuccess(c, gin.H{
+		"items": records,
+		"total": total,
+	})
+}

@@ -114,6 +114,11 @@ func GetStatus(c *gin.Context) {
 		// credentials stay server-side.
 		"phone_login": system_setting.SMSReady(),
 
+		// Zetone: official CN payment channels. Only readiness is public; the
+		// merchant keys never leave the server.
+		"alipay_enabled":     system_setting.AlipayReady(),
+		"wechat_pay_enabled": system_setting.WechatPayReady(),
+
 		// Zetone: contact page. The inbox address itself stays server-side; the
 		// page only needs to know whether the form can be submitted.
 		"contact_info":         common.OptionMap["ContactInfo"],

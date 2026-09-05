@@ -39,6 +39,10 @@ const (
 	PaymentProviderWaffo        = "waffo"
 	PaymentProviderWaffoPancake = "waffo_pancake"
 	PaymentProviderBalance      = "balance"
+	// Official direct integrations, as distinct from the aggregator channels
+	// that the epay provider reaches under the same brand names.
+	PaymentProviderAlipay = "alipay"
+	PaymentProviderWechat = "wechat"
 )
 
 var (

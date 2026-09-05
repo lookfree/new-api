@@ -22,6 +22,7 @@ import { useMemo } from 'react'
 import { useStatus } from '@/hooks/use-status'
 
 import { getPricing } from '../api'
+import { parseVendorZones } from '../lib/zones'
 
 export function usePricingData(enabled = true) {
   const { status } = useStatus()
@@ -63,8 +64,15 @@ export function usePricingData(enabled = true) {
     })
   }, [data])
 
+  // Zetone: vendor -> zone lookup for the domestic / international tabs.
+  const vendorZones = useMemo(
+    () => parseVendorZones(data?.vendor_zones),
+    [data?.vendor_zones]
+  )
+
   return {
     models,
+    vendorZones,
     vendors: data?.vendors ?? [],
     groupRatio: data?.group_ratio ?? {},
     usableGroup: data?.usable_group ?? {},

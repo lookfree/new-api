@@ -113,6 +113,8 @@ export type PricingData = {
   message?: string
   data: PricingModel[]
   vendors: PricingVendor[]
+  /** Zetone: raw `VendorZones` option, JSON of vendor ids per zone. */
+  vendor_zones?: string
   group_ratio: Record<string, number>
   usable_group: Record<string, { desc: string; ratio: number }>
   supported_endpoint: Record<string, string>

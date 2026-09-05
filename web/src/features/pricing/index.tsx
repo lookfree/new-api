@@ -31,19 +31,31 @@ import {
   PricingToolbar,
   ModelCardGrid,
   ModelDetailsDrawer,
+  ZoneTabs,
 } from './components'
 import { EXCLUDED_GROUPS, VIEW_MODES } from './constants'
 import { useFilters } from './hooks/use-filters'
 import { usePricingData } from './hooks/use-pricing-data'
+import {
+  availableZoneTabs,
+  countModelsByZone,
+  filterModelsByZone,
+  ZONE_ALL,
+  type ZoneFilter,
+} from './lib/zones'
 
 export function Pricing() {
   const { t } = useTranslation()
   const [selectedModelName, setSelectedModelName] = useState<string | null>(
     null
   )
+  // Zetone: the zone tab narrows the model list before every other filter, so
+  // the vendor / tag / group facets always describe the zone in view.
+  const [zoneFilter, setZoneFilter] = useState<ZoneFilter>(ZONE_ALL)
 
   const {
     models,
+    vendorZones,
     vendors,
     groupRatio,
     usableGroup,
@@ -53,6 +65,27 @@ export function Pricing() {
     priceRate,
     usdExchangeRate,
   } = usePricingData()
+
+  const allModels = useMemo(() => models || [], [models])
+
+  const zoneTabs = useMemo(
+    () => availableZoneTabs(allModels, vendorZones),
+    [allModels, vendorZones]
+  )
+
+  const zoneCounts = useMemo(
+    () => countModelsByZone(allModels, vendorZones),
+    [allModels, vendorZones]
+  )
+
+  // A zone can vanish when the operator re-maps vendors; fall back to `all`
+  // instead of rendering an empty page with no active tab.
+  const activeZone = zoneTabs.includes(zoneFilter) ? zoneFilter : ZONE_ALL
+
+  const zoneScopedModels = useMemo(
+    () => filterModelsByZone(allModels, activeZone, vendorZones),
+    [allModels, activeZone, vendorZones]
+  )
 
   const {
     searchInput,
@@ -81,7 +114,7 @@ export function Pricing() {
     availableTags,
     clearFilters,
     clearSearch,
-  } = useFilters(models || [])
+  } = useFilters(zoneScopedModels)
 
   const handleModelClick = useCallback((modelName: string) => {
     setSelectedModelName(modelName)
@@ -166,9 +199,9 @@ export function Pricing() {
           className='pointer-events-none absolute inset-x-0 top-0 h-[600px] opacity-20 dark:opacity-[0.10]'
           style={{
             background: [
-              'radial-gradient(ellipse 60% 50% at 20% 20%, oklch(0.72 0.18 250 / 80%) 0%, transparent 70%)',
-              'radial-gradient(ellipse 50% 40% at 80% 15%, oklch(0.65 0.15 200 / 60%) 0%, transparent 70%)',
-              'radial-gradient(ellipse 40% 35% at 50% 70%, oklch(0.70 0.12 280 / 40%) 0%, transparent 70%)',
+              'radial-gradient(ellipse 60% 50% at 20% 20%, color-mix(in oklch, var(--primary) 80%, transparent) 0%, transparent 70%)',
+              'radial-gradient(ellipse 50% 40% at 80% 15%, color-mix(in oklch, var(--chart-3) 55%, transparent) 0%, transparent 70%)',
+              'radial-gradient(ellipse 40% 35% at 50% 70%, color-mix(in oklch, var(--primary) 35%, transparent) 0%, transparent 70%)',
             ].join(', '),
             maskImage:
               'linear-gradient(to bottom, black 40%, transparent 100%)',
@@ -200,6 +233,17 @@ export function Pricing() {
               )}
               className='mx-auto mt-4 max-w-2xl sm:mt-6'
             />
+            {zoneTabs.length > 0 && (
+              <div className='mt-4 flex justify-center sm:mt-5'>
+                <ZoneTabs
+                  zones={zoneTabs}
+                  value={activeZone}
+                  counts={zoneCounts}
+                  total={allModels.length}
+                  onChange={setZoneFilter}
+                />
+              </div>
+            )}
           </header>
 
           <div className='grid gap-4 xl:grid-cols-[330px_minmax(0,1fr)]'>
@@ -218,7 +262,9 @@ export function Pricing() {
               groups={availableGroups}
               groupRatios={groupRatio}
               tags={availableTags}
-              models={models || []}
+              // Zone-scoped so the vendor facet counts (and the vendors shown,
+              // which are filtered to count > 0) describe the zone in view.
+              models={zoneScopedModels}
               hasActiveFilters={hasActiveFilters}
               onClearFilters={clearFilters}
               className='hover-scrollbar sticky top-4 hidden max-h-[calc(100dvh-2rem)] self-start overflow-y-auto xl:block'
@@ -250,7 +296,7 @@ export function Pricing() {
                 groups={availableGroups}
                 groupRatios={groupRatio}
                 tags={availableTags}
-                models={models || []}
+                models={zoneScopedModels}
                 hasActiveFilters={hasActiveFilters}
                 activeFilterCount={activeFilterCount}
                 onClearFilters={clearFilters}

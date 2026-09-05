@@ -78,6 +78,10 @@ func InitOptionMap() {
 	common.OptionMap["Notice"] = ""
 	common.OptionMap["About"] = ""
 	common.OptionMap["HomePageContent"] = ""
+	// Zetone: vendor -> zone map powering the model square's domestic /
+	// international tabs. JSON: {"domestic":[vendorId,...],"international":[...]}.
+	// Empty disables the tabs entirely.
+	common.OptionMap["VendorZones"] = ""
 	common.OptionMap["Footer"] = common.Footer
 	common.OptionMap["SystemName"] = common.SystemName
 	common.OptionMap["Logo"] = common.Logo

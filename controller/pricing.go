@@ -68,6 +68,9 @@ func GetPricing(c *gin.Context) {
 		"success":            true,
 		"data":               pricing,
 		"vendors":            model.GetVendors(),
+		// Zetone: vendor -> zone map driving the model square's domestic /
+		// international tabs. Empty string means the tabs stay hidden.
+		"vendor_zones":       common.OptionMap["VendorZones"],
 		"group_ratio":        groupRatio,
 		"usable_group":       usableGroup,
 		"supported_endpoint": model.GetSupportedEndpointMap(),

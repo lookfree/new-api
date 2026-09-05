@@ -82,6 +82,11 @@ func InitOptionMap() {
 	// international tabs. JSON: {"domestic":[vendorId,...],"international":[...]}.
 	// Empty disables the tabs entirely.
 	common.OptionMap["VendorZones"] = ""
+	// Zetone: contact page. ContactEmail is the inbox the website contact form
+	// forwards to (empty disables the form); ContactInfo is the JSON block of
+	// contact methods the page renders.
+	common.OptionMap["ContactEmail"] = ""
+	common.OptionMap["ContactInfo"] = ""
 	common.OptionMap["Footer"] = common.Footer
 	common.OptionMap["SystemName"] = common.SystemName
 	common.OptionMap["Logo"] = common.Logo

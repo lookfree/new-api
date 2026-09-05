@@ -30,6 +30,9 @@ func SetApiRouter(router *gin.Engine) {
 		apiRouter.GET("/user-agreement", controller.GetUserAgreement)
 		apiRouter.GET("/privacy-policy", controller.GetPrivacyPolicy)
 		apiRouter.GET("/about", controller.GetAbout)
+		// Zetone: website contact form. Rate limited and Turnstile-guarded like
+		// the other anonymous write endpoints; forwards to the ContactEmail inbox.
+		apiRouter.POST("/contact", middleware.CriticalRateLimit(), middleware.TurnstileCheck(), anonymousRequestBodyLimit, controller.ContactMessage)
 		//apiRouter.GET("/midjourney", controller.GetMidjourney)
 		apiRouter.GET("/home_page_content", controller.GetHomePageContent)
 		apiRouter.GET("/pricing", middleware.HeaderNavModuleAuth("pricing"), controller.GetPricing)

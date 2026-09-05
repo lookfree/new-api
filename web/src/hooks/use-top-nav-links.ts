@@ -95,6 +95,11 @@ export function useTopNavLinks(): TopNavLink[] {
     }
   }
 
+  // Contact
+  if (modules?.contact !== false) {
+    links.push({ title: t('Contact'), href: '/contact' })
+  }
+
   // About
   if (modules?.about !== false) {
     links.push({ title: t('About'), href: '/about' })

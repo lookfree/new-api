@@ -110,6 +110,11 @@ func GetStatus(c *gin.Context) {
 		"HeaderNavModules":    common.OptionMap["HeaderNavModules"],
 		"SidebarModulesAdmin": common.OptionMap["SidebarModulesAdmin"],
 
+		// Zetone: contact page. The inbox address itself stays server-side; the
+		// page only needs to know whether the form can be submitted.
+		"contact_info":         common.OptionMap["ContactInfo"],
+		"contact_form_enabled": common.OptionMap["ContactEmail"] != "",
+
 		"oidc_enabled":                system_setting.GetOIDCSettings().Enabled,
 		"oidc_client_id":              system_setting.GetOIDCSettings().ClientId,
 		"oidc_authorization_endpoint": system_setting.GetOIDCSettings().AuthorizationEndpoint,

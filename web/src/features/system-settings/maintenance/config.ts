@@ -28,6 +28,7 @@ export type HeaderNavModulesConfig = {
   rankings: HeaderNavAccessConfig
   docs: boolean
   about: boolean
+  contact: boolean
   [key: string]: boolean | HeaderNavAccessConfig
 }
 
@@ -50,6 +51,7 @@ export const HEADER_NAV_DEFAULT: HeaderNavModulesConfig = {
     requireAuth: false,
   },
   docs: true,
+  contact: true,
   about: true,
 }
 

@@ -110,6 +110,10 @@ func GetStatus(c *gin.Context) {
 		"HeaderNavModules":    common.OptionMap["HeaderNavModules"],
 		"SidebarModulesAdmin": common.OptionMap["SidebarModulesAdmin"],
 
+		// Zetone: phone sign-in. Only the readiness flag is public; the SMS
+		// credentials stay server-side.
+		"phone_login": system_setting.SMSReady(),
+
 		// Zetone: contact page. The inbox address itself stays server-side; the
 		// page only needs to know whether the form can be submitted.
 		"contact_info":         common.OptionMap["ContactInfo"],

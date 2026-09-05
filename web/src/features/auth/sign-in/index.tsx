@@ -17,11 +17,14 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { Link, useSearch } from '@tanstack/react-router'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { useStatus } from '@/hooks/use-status'
+import { cn } from '@/lib/utils'
 
 import { AuthLayout } from '../auth-layout'
+import { PhoneAuthForm } from '../components/phone-auth-form'
 import { TermsFooter } from '../components/terms-footer'
 import { UserAuthForm } from './components/user-auth-form'
 
@@ -29,6 +32,14 @@ export function SignIn() {
   const { t } = useTranslation()
   const { redirect } = useSearch({ from: '/(auth)/sign-in' })
   const { status } = useStatus()
+
+  // Phone sign-in only appears once an operator has configured an SMS
+  // provider; otherwise the page is exactly what it was.
+  const phoneLoginEnabled = Boolean(
+    (status as Record<string, unknown> | null)?.phone_login
+  )
+  const [method, setMethod] = useState<'phone' | 'password'>('phone')
+  const activeMethod = phoneLoginEnabled ? method : 'password'
 
   return (
     <AuthLayout>
@@ -52,7 +63,32 @@ export function SignIn() {
             )}
         </div>
 
-        <UserAuthForm redirectTo={redirect} />
+        {phoneLoginEnabled && (
+          <div className='bg-muted/60 inline-flex w-full rounded-lg border p-0.5'>
+            {(['phone', 'password'] as const).map((value) => (
+              <button
+                key={value}
+                type='button'
+                onClick={() => setMethod(value)}
+                aria-pressed={activeMethod === value}
+                className={cn(
+                  'flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
+                  activeMethod === value
+                    ? 'bg-primary text-primary-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                )}
+              >
+                {value === 'phone' ? t('Phone number') : t('Password')}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {activeMethod === 'phone' ? (
+          <PhoneAuthForm redirectTo={redirect} />
+        ) : (
+          <UserAuthForm redirectTo={redirect} />
+        )}
 
         <TermsFooter
           variant='sign-in'

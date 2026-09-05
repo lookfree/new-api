@@ -236,3 +236,37 @@ export async function bindEmail(
   })
   return res.data
 }
+
+// ----------------------------------------------------------------------------
+// Phone sign-in
+// ----------------------------------------------------------------------------
+
+/** Request an SMS verification code for a phone number. */
+export async function sendPhoneVerificationCode(
+  phone: string,
+  turnstileToken?: string
+) {
+  const res = await api.post(
+    '/api/user/phone/code',
+    { phone },
+    { params: { turnstile: turnstileToken ?? '' } }
+  )
+  return res.data
+}
+
+/**
+ * Verify a code and sign in. Registers the account on first use, so `affCode`
+ * carries the referral code from the link the visitor arrived on.
+ */
+export async function phoneLogin(
+  phone: string,
+  code: string,
+  affCode?: string
+) {
+  const res = await api.post('/api/user/phone/login', {
+    phone,
+    code,
+    aff_code: affCode ?? '',
+  })
+  return res.data
+}

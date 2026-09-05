@@ -89,6 +89,7 @@ type User struct {
 	DiscordId        string                     `json:"discord_id" gorm:"column:discord_id;index"`
 	OidcId           string                     `json:"oidc_id" gorm:"column:oidc_id;index"`
 	WeChatId         string                     `json:"wechat_id" gorm:"column:wechat_id;index"`
+	Phone            string                     `json:"phone" gorm:"column:phone;index" validate:"max=20"`
 	TelegramId       string                     `json:"telegram_id" gorm:"column:telegram_id;index"`
 	VerificationCode string                     `json:"verification_code" gorm:"-:all"`                         // this field is only for Email verification, don't save it to database!
 	AccessToken      *string                    `json:"-" gorm:"type:char(32);column:access_token;uniqueIndex"` // this token is for system management
@@ -1067,6 +1068,16 @@ func (user *User) FillUserByWeChatId() error {
 	return nil
 }
 
+// FillUserByPhone loads the account bound to user.Phone, leaving the record
+// untouched when no account matches so callers can branch on user.Id == 0.
+func (user *User) FillUserByPhone() error {
+	if user.Phone == "" {
+		return errors.New("手机号为空！")
+	}
+	DB.Where(User{Phone: user.Phone}).First(user)
+	return nil
+}
+
 func (user *User) FillUserByTelegramId() error {
 	if user.TelegramId == "" {
 		return errors.New("Telegram id 为空！")
@@ -1104,6 +1115,13 @@ func GetUniqueUserByEmail(email string) (*User, error) {
 
 func IsWeChatIdAlreadyTaken(wechatId string) bool {
 	return DB.Unscoped().Where("wechat_id = ?", wechatId).Find(&User{}).RowsAffected == 1
+}
+
+// IsPhoneAlreadyTaken reports whether a phone number is bound to any account,
+// including soft-deleted ones, so a released number cannot silently take over
+// a deleted user's identity.
+func IsPhoneAlreadyTaken(phone string) bool {
+	return DB.Unscoped().Where("phone = ?", phone).Find(&User{}).RowsAffected == 1
 }
 
 func IsGitHubIdAlreadyTaken(githubId string) bool {

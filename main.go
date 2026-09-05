@@ -32,6 +32,7 @@ import (
 	"github.com/QuantumNous/new-api/service/authz"
 	_ "github.com/QuantumNous/new-api/setting/performance_setting"
 	"github.com/QuantumNous/new-api/setting/ratio_setting"
+	"github.com/QuantumNous/new-api/setting/system_setting"
 
 	"github.com/bytedance/gopkg/util/gopool"
 	"github.com/gin-gonic/gin"
@@ -334,6 +335,9 @@ func InitResources() error {
 		}
 	}
 	model.InitOptionMap()
+	// Repair out-of-range SMS values loaded from the options table before any
+	// request can read them.
+	system_setting.NormalizeSMSSettings()
 
 	// 清理旧的磁盘缓存文件
 	common.CleanupOldCacheFiles()
@@ -349,6 +353,10 @@ func InitResources() error {
 	if err != nil {
 		return err
 	}
+
+	// Phone codes fall back to per-process memory without Redis, which fails
+	// silently across nodes; warn once now that Redis state is known.
+	service.WarnIfPhoneCodeStoreIsLocal()
 
 	perfmetrics.Init()
 

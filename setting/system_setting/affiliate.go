@@ -35,6 +35,9 @@ type AffiliateSettings struct {
 	// Rate is the inviter's share of a top-up, as a fraction: 0.1 is 10%.
 	Rate float64 `json:"rate"`
 	// FirstTopupOnly pays only on the invitee's first successful top-up.
+	// Defaults on: paying once per referred customer is the agreed rule, and
+	// it is the conservative default — turning it off increases payouts, which
+	// should be a deliberate act rather than something a fresh install does.
 	FirstTopupOnly bool `json:"first_topup_only"`
 	// MinTopupQuota skips rewards for top-ups below this credited quota,
 	// which is what stops a referral loop being farmed with tiny payments.
@@ -44,7 +47,7 @@ type AffiliateSettings struct {
 var affiliateSettings = AffiliateSettings{
 	Enabled:        false,
 	Rate:           0.1,
-	FirstTopupOnly: false,
+	FirstTopupOnly: true,
 	MinTopupQuota:  0,
 }
 

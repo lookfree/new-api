@@ -1,0 +1,136 @@
+/*
+ * Zetone (智航通) brand palette.
+ *
+ * Site-level override of the shipped default palette, kept in its own file so
+ * upstream `theme.css` / `theme-presets.css` stay untouched and rebases stay
+ * clean. Imported last from `index.css`, so these `:root` / `.dark` values win
+ * over the same-specificity blocks in `theme.css` by source order.
+ *
+ * Named theme presets are unaffected: their selectors sit on <body>
+ * (`[data-theme-preset='...']`), so they still override these :root values for
+ * any visitor who picks one in the theme customizer.
+ *
+ * Token values are taken verbatim from the Zetone prototype's `globals.css`
+ * (vermilion primary oklch(0.486 0.213 28.6), warm-biased neutrals at hue 30).
+ * Tokens that exist in new-api but not in the prototype are derived from the
+ * same palette and marked below.
+ */
+
+@theme {
+  --font-sans: 'Geist Variable', 'Geist', -apple-system, BlinkMacSystemFont,
+    'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  --font-mono: 'Geist Mono Variable', 'Geist Mono', ui-monospace, 'SF Mono',
+    Menlo, Consolas, monospace;
+}
+
+:root {
+  --radius: 0.5rem;
+
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.205 0.003 30);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.205 0.003 30);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.205 0.003 30);
+  --primary: oklch(0.486 0.213 28.6);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.985 0.001 30);
+  --secondary-foreground: oklch(0.205 0.003 30);
+  --muted: oklch(0.965 0.0015 30);
+  --muted-foreground: oklch(0.52 0.005 30);
+  --accent: oklch(0.965 0.0015 30);
+  --accent-foreground: oklch(0.205 0.003 30);
+  --border: oklch(0.93 0.0025 30);
+  --input: oklch(0.93 0.0025 30);
+  --ring: oklch(0.486 0.213 28.6);
+
+  --destructive: oklch(0.577 0.245 27.325);
+  --success: oklch(0.627 0.179 149);
+  --warning: oklch(0.667 0.162 58);
+  /* Not in the prototype: a desaturated slate that reads as informational
+     without competing with the vermilion primary. */
+  --info: oklch(0.55 0.11 245);
+  --neutral: oklch(0.52 0.005 30);
+
+  /* Foreground pairs for the semantic colors above (prototype has no
+     equivalents; white on the saturated fills, warm ink on the amber). */
+  --destructive-foreground: oklch(0.99 0.001 30);
+  --success-foreground: oklch(0.99 0.001 30);
+  --warning-foreground: oklch(0.205 0.003 30);
+  --info-foreground: oklch(0.99 0.001 30);
+  --neutral-foreground: oklch(0.99 0.001 30);
+
+  --chart-1: oklch(0.486 0.213 28.6);
+  --chart-2: oklch(0.627 0.179 149);
+  --chart-3: oklch(0.667 0.162 58);
+  --chart-4: oklch(0.52 0.005 30);
+  --chart-5: oklch(0.7 0.01 30);
+  --overview-accent-1: oklch(0.486 0.213 28.6);
+  --overview-accent-2: oklch(0.627 0.179 149);
+  --overview-accent-3: oklch(0.667 0.162 58);
+
+  --sidebar: oklch(0.985 0.001 30);
+  --sidebar-foreground: oklch(0.205 0.003 30);
+  --sidebar-primary: oklch(0.486 0.213 28.6);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.965 0.0015 30);
+  --sidebar-accent-foreground: oklch(0.205 0.003 30);
+  --sidebar-border: oklch(0.93 0.0025 30);
+  --sidebar-ring: oklch(0.486 0.213 28.6);
+
+  --skeleton-base: oklch(0.965 0.0015 30);
+  --skeleton-highlight: oklch(0.985 0.001 30);
+}
+
+.dark {
+  --background: oklch(0.17 0.004 30);
+  --foreground: oklch(0.97 0.001 30);
+  --card: oklch(0.215 0.005 30);
+  --card-foreground: oklch(0.97 0.001 30);
+  --popover: oklch(0.215 0.005 30);
+  --popover-foreground: oklch(0.97 0.001 30);
+  --primary: oklch(0.58 0.21 28.6);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.26 0.005 30);
+  --secondary-foreground: oklch(0.97 0.001 30);
+  --muted: oklch(0.26 0.005 30);
+  --muted-foreground: oklch(0.7 0.005 30);
+  --accent: oklch(0.26 0.005 30);
+  --accent-foreground: oklch(0.97 0.001 30);
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.58 0.21 28.6);
+
+  --destructive: oklch(0.704 0.191 22.216);
+  --success: oklch(0.7 0.17 149);
+  --warning: oklch(0.75 0.15 70);
+  --info: oklch(0.68 0.12 245);
+  --neutral: oklch(0.7 0.005 30);
+
+  --destructive-foreground: oklch(0.17 0.004 30);
+  --success-foreground: oklch(0.17 0.004 30);
+  --warning-foreground: oklch(0.17 0.004 30);
+  --info-foreground: oklch(0.17 0.004 30);
+  --neutral-foreground: oklch(0.17 0.004 30);
+
+  --chart-1: oklch(0.58 0.21 28.6);
+  --chart-2: oklch(0.7 0.17 149);
+  --chart-3: oklch(0.75 0.15 70);
+  --chart-4: oklch(0.7 0.005 30);
+  --chart-5: oklch(0.5 0.01 30);
+  --overview-accent-1: oklch(0.58 0.21 28.6);
+  --overview-accent-2: oklch(0.7 0.17 149);
+  --overview-accent-3: oklch(0.75 0.15 70);
+
+  --sidebar: oklch(0.195 0.004 30);
+  --sidebar-foreground: oklch(0.97 0.001 30);
+  --sidebar-primary: oklch(0.58 0.21 28.6);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.26 0.005 30);
+  --sidebar-accent-foreground: oklch(0.97 0.001 30);
+  --sidebar-border: oklch(1 0 0 / 12%);
+  --sidebar-ring: oklch(0.58 0.21 28.6);
+
+  --skeleton-base: oklch(0.26 0.005 30);
+  --skeleton-highlight: oklch(0.33 0.005 30);
+}

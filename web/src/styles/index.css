@@ -26,9 +26,12 @@ For commercial licensing, please contact support@quantumnous.com
  * that activates it. Loaded globally so font-switching is instantaneous
  * with no FOUT once the variable is fetched. */
 @import '@fontsource-variable/lora';
+@import '@fontsource-variable/geist';
+@import '@fontsource-variable/geist-mono';
 
 @import './theme.css';
 @import './theme-presets.css';
+@import './zetone.css';
 
 /* Shiki dual themes: token colors follow dark theme (pre background stays `bg-background` on the block) */
 @layer components {

@@ -29,6 +29,7 @@ import { BillingHistoryDialog } from './components/dialogs/billing-history-dialo
 import { CreemConfirmDialog } from './components/dialogs/creem-confirm-dialog'
 import { PaymentConfirmDialog } from './components/dialogs/payment-confirm-dialog'
 import { TransferDialog } from './components/dialogs/transfer-dialog'
+import { CNPaymentSection } from './components/cn-payment-section'
 import { RechargeFormCard } from './components/recharge-form-card'
 import { SubscriptionPlansCard } from './components/subscription-plans-card'
 import { WalletStatsCard } from './components/wallet-stats-card'
@@ -329,6 +330,23 @@ export function Wallet(props: WalletProps) {
                     topupInfo?.enable_waffo_pancake_topup
                   }
                 />
+
+                {/* Official Alipay / WeChat Pay, kept out of the upstream card
+                    so that component stays untouched. Renders nothing unless
+                    an operator has configured at least one of them. */}
+                <div className='mt-3 sm:mt-5'>
+                  <CNPaymentSection
+                    amount={topupAmount}
+                    minTopup={getMinTopupAmount(topupInfo)}
+                    sharedAmountVisible={Boolean(
+                      topupInfo?.enable_online_topup ||
+                        topupInfo?.enable_stripe_topup ||
+                        topupInfo?.enable_waffo_topup ||
+                        topupInfo?.enable_waffo_pancake_topup ||
+                        topupInfo?.enable_creem_topup
+                    )}
+                  />
+                </div>
               </div>
 
               <SubscriptionPlansCard

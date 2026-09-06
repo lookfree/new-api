@@ -24,6 +24,7 @@ import { useStatus } from '@/hooks/use-status'
 import { cn } from '@/lib/utils'
 
 import { AuthLayout } from '../auth-layout'
+import { OAuthProviders } from '../components/oauth-providers'
 import { PhoneAuthForm } from '../components/phone-auth-form'
 import { TermsFooter } from '../components/terms-footer'
 import { UserAuthForm } from './components/user-auth-form'
@@ -85,7 +86,13 @@ export function SignIn() {
         )}
 
         {activeMethod === 'phone' ? (
-          <PhoneAuthForm redirectTo={redirect} />
+          <>
+            <PhoneAuthForm redirectTo={redirect} />
+            {/* Third-party sign-in lives inside UserAuthForm, so switching to
+                the phone tab would otherwise hide it. It belongs to the page,
+                not to one credential form, and stays visible either way. */}
+            <OAuthProviders status={status} redirectTo={redirect} />
+          </>
         ) : (
           <UserAuthForm redirectTo={redirect} />
         )}

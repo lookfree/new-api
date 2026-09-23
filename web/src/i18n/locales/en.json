@@ -5801,6 +5801,7 @@
     "Try-it conversation": "Try-it conversation",
     "The model returned no content.": "The model returned no content.",
     "See the full details for tier prices.": "See the full details for tier prices.",
-    "This is not a chat model, so it cannot be tried here. See the full details for its endpoints and call examples.": "This is not a chat model, so it cannot be tried here. See the full details for its endpoints and call examples."
+    "This is not a chat model, so it cannot be tried here. See the full details for its endpoints and call examples.": "This is not a chat model, so it cannot be tried here. See the full details for its endpoints and call examples.",
+    "Airwallex": "Airwallex"
   }
 }

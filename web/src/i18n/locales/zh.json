@@ -5801,6 +5801,7 @@
     "Try-it conversation": "试用对话",
     "The model returned no content.": "模型没有返回内容。",
     "See the full details for tier prices.": "分档价格请查看完整详情。",
-    "This is not a chat model, so it cannot be tried here. See the full details for its endpoints and call examples.": "该模型不是对话模型，无法在此试用；接口与调用示例请查看完整详情。"
+    "This is not a chat model, so it cannot be tried here. See the full details for its endpoints and call examples.": "该模型不是对话模型，无法在此试用；接口与调用示例请查看完整详情。",
+    "Airwallex": "空中云汇 Airwallex"
   }
 }

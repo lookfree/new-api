@@ -910,7 +910,7 @@ export function PaymentSettingsSection({
             <div className='overflow-x-auto pb-1'>
               <TabsList className='grid min-w-[52rem] grid-cols-7'>
                 <TabsTrigger value='general'>{t('General')}</TabsTrigger>
-                <TabsTrigger value='airwallex'>Airwallex</TabsTrigger>
+                <TabsTrigger value='airwallex'>{t('Airwallex')}</TabsTrigger>
                 <TabsTrigger value='epay'>Epay</TabsTrigger>
                 <TabsTrigger value='stripe'>{t('Stripe')}</TabsTrigger>
                 <TabsTrigger value='creem'>Creem</TabsTrigger>

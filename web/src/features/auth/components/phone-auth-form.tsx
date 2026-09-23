@@ -65,6 +65,8 @@ export function PhoneAuthForm(props: {
   /** Terms checkbox, rendered just above the submit button. */
   agreement?: ReactNode
   onRequireAgreement?: () => void
+  /** Submit button label. Defaults to the sign-in wording. */
+  submitLabel?: string
 }) {
   const { t } = useTranslation()
   const { handleLoginSuccess } = useAuthRedirect()
@@ -207,7 +209,7 @@ export function PhoneAuthForm(props: {
 
         <Button type='submit' className='w-full' disabled={isSubmitting}>
           {isSubmitting && <Loader2 className='animate-spin' />}
-          {t('Sign in')}
+          {props.submitLabel ?? t('Sign in')}
         </Button>
       </form>
     </Form>

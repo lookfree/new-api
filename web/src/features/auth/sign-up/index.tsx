@@ -162,6 +162,7 @@ export function SignUp() {
               agreed={agreed}
               agreement={agreement}
               onRequireAgreement={requireAgreement}
+              submitLabel={t('Create account')}
             />
           </div>
         ) : (

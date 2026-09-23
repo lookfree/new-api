@@ -96,12 +96,35 @@ func GetTopUpInfo(c *gin.Context) {
 		}
 	}
 
+	// Airwallex hosts the payment page, where the customer picks bank card,
+	// Alipay or WeChat Pay, so it is offered as a single method here.
+	enableAirwallex := isAirwallexTopUpEnabled()
+	if enableAirwallex {
+		hasAirwallex := false
+		for _, method := range payMethods {
+			if method["type"] == model.PaymentMethodAirwallex {
+				hasAirwallex = true
+				break
+			}
+		}
+
+		if !hasAirwallex {
+			payMethods = append(payMethods, map[string]string{
+				"name":      "Airwallex",
+				"type":      model.PaymentMethodAirwallex,
+				"color":     "#612FFF",
+				"min_topup": strconv.Itoa(operation_setting.MinTopUp),
+			})
+		}
+	}
+
 	data := gin.H{
 		"enable_online_topup":              isEpayTopUpEnabled(),
 		"enable_stripe_topup":              isStripeTopUpEnabled(),
 		"enable_creem_topup":               isCreemTopUpEnabled(),
 		"enable_waffo_topup":               enableWaffo,
 		"enable_waffo_pancake_topup":       enableWaffoPancake,
+		"enable_airwallex_topup":           enableAirwallex,
 		"enable_redemption":                complianceConfirmed,
 		"payment_compliance_confirmed":     complianceConfirmed,
 		"payment_compliance_terms_version": operation_setting.CurrentComplianceTermsVersion,

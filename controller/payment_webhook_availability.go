@@ -108,3 +108,22 @@ func isEpayWebhookConfigured() bool {
 func isEpayWebhookEnabled() bool {
 	return isEpayTopUpEnabled()
 }
+
+func isAirwallexTopUpEnabled() bool {
+	if !isPaymentComplianceConfirmed() {
+		return false
+	}
+	return setting.AirwallexEnabled && isAirwallexWebhookConfigured()
+}
+
+// A gateway without the webhook secret could take payments it can never
+// verify, so credentials and the secret gate the whole channel together.
+func isAirwallexWebhookConfigured() bool {
+	return strings.TrimSpace(setting.AirwallexClientId) != "" &&
+		strings.TrimSpace(setting.AirwallexApiKey) != "" &&
+		strings.TrimSpace(setting.AirwallexWebhookSecret) != ""
+}
+
+func isAirwallexWebhookEnabled() bool {
+	return isAirwallexTopUpEnabled()
+}

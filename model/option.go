@@ -112,6 +112,10 @@ func InitOptionMap() {
 	common.OptionMap["CreemProducts"] = setting.CreemProducts
 	common.OptionMap["CreemTestMode"] = strconv.FormatBool(setting.CreemTestMode)
 	common.OptionMap["CreemWebhookSecret"] = setting.CreemWebhookSecret
+	common.OptionMap["AirwallexEnabled"] = strconv.FormatBool(setting.AirwallexEnabled)
+	common.OptionMap["AirwallexClientId"] = setting.AirwallexClientId
+	common.OptionMap["AirwallexApiKey"] = setting.AirwallexApiKey
+	common.OptionMap["AirwallexWebhookSecret"] = setting.AirwallexWebhookSecret
 	common.OptionMap["WaffoEnabled"] = strconv.FormatBool(setting.WaffoEnabled)
 	common.OptionMap["WaffoApiKey"] = setting.WaffoApiKey
 	common.OptionMap["WaffoPrivateKey"] = setting.WaffoPrivateKey
@@ -484,6 +488,14 @@ func updateOptionMap(key string, value string) (err error) {
 		setting.CreemTestMode = value == "true"
 	case "CreemWebhookSecret":
 		setting.CreemWebhookSecret = value
+	case "AirwallexEnabled":
+		setting.AirwallexEnabled = value == "true"
+	case "AirwallexClientId":
+		setting.AirwallexClientId = value
+	case "AirwallexApiKey":
+		setting.AirwallexApiKey = value
+	case "AirwallexWebhookSecret":
+		setting.AirwallexWebhookSecret = value
 	case "WaffoEnabled":
 		setting.WaffoEnabled = value == "true"
 	case "WaffoApiKey":

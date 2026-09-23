@@ -48,6 +48,9 @@ func NotifyUpstreamModelUpdateWatchers(subject string, content string) {
 }
 
 func NotifyUser(userId int, userEmail string, userSetting dto.UserSetting, data dto.Notify) error {
+	if userSetting.NotifyDisabled {
+		return nil
+	}
 	notifyType := userSetting.NotifyType
 	if notifyType == "" {
 		notifyType = dto.NotifyTypeEmail

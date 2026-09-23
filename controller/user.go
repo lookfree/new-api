@@ -1436,6 +1436,9 @@ type UpdateUserSettingRequest struct {
 	UpstreamModelUpdateNotifyEnabled *bool   `json:"upstream_model_update_notify_enabled,omitempty"`
 	AcceptUnsetModelRatioModel       bool    `json:"accept_unset_model_ratio_model"`
 	RecordIpLog                      bool    `json:"record_ip_log"`
+	// NotifyDisabled turns balance alerts and other notices off without
+	// touching the channel settings; nil keeps the current value.
+	NotifyDisabled *bool `json:"notify_disabled,omitempty"`
 }
 
 func UpdateUserSetting(c *gin.Context) {
@@ -1531,13 +1534,21 @@ func UpdateUserSetting(c *gin.Context) {
 		upstreamModelUpdateNotifyEnabled = *req.UpstreamModelUpdateNotifyEnabled
 	}
 
-	// 构建设置
+	// 构建设置。通知相关字段按所选类型整体重建；语言、侧边栏、扣费策略不属于
+	// 通知表单，必须沿用已有值，否则保存通知设置会把它们一并清空。
 	settings := dto.UserSetting{
 		NotifyType:                       req.QuotaWarningType,
 		QuotaWarningThreshold:            req.QuotaWarningThreshold,
 		UpstreamModelUpdateNotifyEnabled: upstreamModelUpdateNotifyEnabled,
 		AcceptUnsetRatioModel:            req.AcceptUnsetModelRatioModel,
 		RecordIpLog:                      req.RecordIpLog,
+		SidebarModules:                   existingSettings.SidebarModules,
+		BillingPreference:                existingSettings.BillingPreference,
+		Language:                         existingSettings.Language,
+		NotifyDisabled:                   existingSettings.NotifyDisabled,
+	}
+	if req.NotifyDisabled != nil {
+		settings.NotifyDisabled = *req.NotifyDisabled
 	}
 
 	// 如果是webhook类型,添加webhook相关设置

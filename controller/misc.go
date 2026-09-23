@@ -49,6 +49,7 @@ func GetStatus(c *gin.Context) {
 
 	passkeySetting := system_setting.GetPasskeySettings()
 	legalSetting := system_setting.GetLegalSettings()
+	affiliateSetting := system_setting.GetAffiliateSettings()
 
 	data := gin.H{
 		"version":                     common.Version,
@@ -95,6 +96,10 @@ func GetStatus(c *gin.Context) {
 		"default_use_auto_group":        setting.DefaultUseAutoGroup,
 
 		"password_login_encryption_enabled": common.PasswordLoginEncryptionEnabled,
+
+		"aff_reward_active":           system_setting.AffiliateRewardActive(),
+		"aff_reward_rate":             affiliateSetting.Rate,
+		"aff_reward_first_topup_only": affiliateSetting.FirstTopupOnly,
 
 		"usd_exchange_rate": operation_setting.USDExchangeRate,
 		"price":             operation_setting.Price,

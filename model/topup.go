@@ -29,6 +29,7 @@ const (
 	PaymentMethodCreem        = "creem"
 	PaymentMethodWaffo        = "waffo"
 	PaymentMethodWaffoPancake = "waffo_pancake"
+	PaymentMethodAirwallex    = "airwallex"
 	PaymentMethodBalance      = "balance"
 )
 
@@ -38,6 +39,7 @@ const (
 	PaymentProviderCreem        = "creem"
 	PaymentProviderWaffo        = "waffo"
 	PaymentProviderWaffoPancake = "waffo_pancake"
+	PaymentProviderAirwallex    = "airwallex"
 	PaymentProviderBalance      = "balance"
 	// Official direct integrations, as distinct from the aggregator channels
 	// that the epay provider reaches under the same brand names.
@@ -667,6 +669,70 @@ func RechargeWaffo(tradeNo string, callerIp string) (err error) {
 
 	if quotaToAdd > 0 {
 		RecordTopupLog(topUp.UserId, fmt.Sprintf("Waffo充值成功，充值额度: %v，支付金额: %.2f", logger.FormatQuota(quotaToAdd), topUp.Money), callerIp, topUp.PaymentMethod, PaymentMethodWaffo)
+	}
+
+	return nil
+}
+
+// RechargeAirwallex credits an Airwallex top-up once its webhook reports
+// payment_intent.succeeded. Amount follows the same convention as the other
+// CNY-denominated providers (Epay, Waffo): stored in display units, credited
+// as Amount * QuotaPerUnit.
+func RechargeAirwallex(tradeNo string, callerIp string) (err error) {
+	if tradeNo == "" {
+		return errors.New("未提供支付单号")
+	}
+
+	var quotaToAdd int
+	topUp := &TopUp{}
+
+	refCol := "`trade_no`"
+	if common.UsingMainDatabase(common.DatabaseTypePostgreSQL) {
+		refCol = `"trade_no"`
+	}
+
+	err = DB.Transaction(func(tx *gorm.DB) error {
+		err := lockForUpdate(tx).Where(refCol+" = ?", tradeNo).First(topUp).Error
+		if err != nil {
+			return errors.New("充值订单不存在")
+		}
+
+		if topUp.PaymentProvider != PaymentProviderAirwallex {
+			return ErrPaymentMethodMismatch
+		}
+
+		if topUp.Status == common.TopUpStatusSuccess {
+			return nil // 幂等：已成功直接返回
+		}
+
+		if topUp.Status != common.TopUpStatusPending {
+			return errors.New("充值订单状态错误")
+		}
+
+		quotaToAdd, err = common.WalletQuotaFromDecimalStrict(
+			decimal.NewFromInt(topUp.Amount).Mul(decimal.NewFromFloat(common.QuotaPerUnit)),
+		)
+		if err != nil || quotaToAdd <= 0 {
+			return ErrInvalidTopUpQuota
+		}
+
+		topUp.CompleteTime = common.GetTimestamp()
+		topUp.Status = common.TopUpStatusSuccess
+		if err := tx.Save(topUp).Error; err != nil {
+			return err
+		}
+
+		return settleTopUpCredit(tx, topUp, quotaToAdd, nil)
+	})
+
+	if err != nil {
+		common.SysError("airwallex topup failed: " + err.Error())
+		return errors.New("充值失败，请稍后重试")
+	}
+	syncCreditUserQuotaCache(topUp.UserId, quotaToAdd, "airwallex topup")
+
+	if quotaToAdd > 0 {
+		RecordTopupLog(topUp.UserId, fmt.Sprintf("空中云汇充值成功，充值额度: %v，支付金额: %.2f", logger.FormatQuota(quotaToAdd), topUp.Money), callerIp, topUp.PaymentMethod, PaymentMethodAirwallex)
 	}
 
 	return nil

@@ -2,6 +2,7 @@ package dto
 
 type UserSetting struct {
 	NotifyType                       string  `json:"notify_type,omitempty"`                          // QuotaWarningType 额度预警类型
+	NotifyDisabled                   bool    `json:"notify_disabled,omitempty"`                      // 关闭额度预警等通知；保留各渠道配置，重新开启即可恢复
 	QuotaWarningThreshold            float64 `json:"quota_warning_threshold,omitempty"`              // QuotaWarningThreshold 额度预警阈值
 	WebhookUrl                       string  `json:"webhook_url,omitempty"`                          // WebhookUrl webhook地址
 	WebhookSecret                    string  `json:"webhook_secret,omitempty"`                       // WebhookSecret webhook密钥

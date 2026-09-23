@@ -21,6 +21,7 @@ import { memo, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/components/ui/button'
+import { formatContextLength } from '@/features/home/lib/format'
 import { getLobeIcon } from '@/lib/lobe-icon'
 import { cn } from '@/lib/utils'
 
@@ -304,10 +305,3 @@ export const ModelCard = memo(function ModelCard(props: ModelCardProps) {
     </div>
   )
 })
-
-function formatContextLength(tokens: number): string {
-  if (tokens >= 1_000_000) {
-    return `${Math.round(tokens / 1_000_000)}M`
-  }
-  return `${Math.round(tokens / 1000)}K`
-}

@@ -37,6 +37,26 @@ describe('formatContextLength', () => {
     expect(formatContextLength(undefined)).toBe('-')
     expect(formatContextLength(0)).toBe('-')
   })
+
+  it('names power-of-two windows the way the models are quoted', () => {
+    expect(formatContextLength(8_192)).toBe('8K')
+    expect(formatContextLength(32_768)).toBe('32K')
+    expect(formatContextLength(65_536)).toBe('64K')
+    expect(formatContextLength(131_072)).toBe('128K')
+    expect(formatContextLength(1_048_576)).toBe('1M')
+  })
+
+  it('keeps decimal sizes decimal even when they divide by 1024', () => {
+    // 128000 = 125 x 1024, but nobody calls it 125K.
+    expect(formatContextLength(128_000)).toBe('128K')
+    expect(formatContextLength(200_000)).toBe('200K')
+    expect(formatContextLength(64_000)).toBe('64K')
+    expect(formatContextLength(1_000_000)).toBe('1M')
+  })
+
+  it('prints sizes under a thousand as plain numbers', () => {
+    expect(formatContextLength(512)).toBe('512')
+  })
 })
 
 describe('padPriceDecimals', () => {

@@ -20,9 +20,19 @@ const CONTEXT_FORMAT = new Intl.NumberFormat('en-US', {
   maximumFractionDigits: 1,
 })
 
-/** Context window as the prototype prints it: 128K, 2M. Unknown sizes show "-". */
+/**
+ * Context window as the prototype prints it: 8K, 128K, 200K, 2M. Sizes that
+ * are a power of two times 1024 are quoted in binary units (8192 is 8K,
+ * 131072 is 128K, 1048576 is 1M) because that is how those windows are
+ * named; everything else is decimal (200000 is 200K, 128000 is 128K).
+ * Unknown sizes show "-".
+ */
 export function formatContextLength(tokens?: number): string {
   if (!tokens || !Number.isFinite(tokens) || tokens <= 0) return '-'
+  const kibi = tokens / 1024
+  if (Number.isInteger(kibi) && (kibi & (kibi - 1)) === 0) {
+    return kibi >= 1024 ? `${kibi / 1024}M` : `${kibi}K`
+  }
   if (tokens >= 1_000_000) {
     return `${CONTEXT_FORMAT.format(tokens / 1_000_000)}M`
   }

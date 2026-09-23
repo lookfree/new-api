@@ -5669,6 +5669,9 @@
     "View docs": "查看文档",
     "Welcome back. Sign in to open your console.": "欢迎回来，登录后进入控制台。",
     "Zone": "分区",
-    "and_terms": "与"
+    "and_terms": "与",
+    "Create your {{name}} account": "注册{{name}}",
+    "Invite code": "邀请码",
+    "optional": "选填"
   }
 }

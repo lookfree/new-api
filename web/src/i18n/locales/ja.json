@@ -5669,6 +5669,9 @@
     "View docs": "View docs",
     "Welcome back. Sign in to open your console.": "Welcome back. Sign in to open your console.",
     "Zone": "Zone",
-    "and_terms": "and"
+    "and_terms": "and",
+    "Create your {{name}} account": "Create your {{name}} account",
+    "Invite code": "Invite code",
+    "optional": "optional"
   }
 }

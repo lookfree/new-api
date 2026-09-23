@@ -19,6 +19,8 @@ For commercial licensing, please contact support@quantumnous.com
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 
+import { LanguageSwitcher } from '@/components/language-switcher'
+import { ThemeSwitch } from '@/components/theme-switch'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useSystemConfig } from '@/hooks/use-system-config'
 
@@ -31,33 +33,40 @@ export function AuthLayout({ children }: AuthLayoutProps) {
   const { systemName, logo, loading } = useSystemConfig()
 
   return (
-    <div className='relative grid h-svh max-w-none'>
-      <Link
-        to='/'
-        className='absolute top-4 left-4 z-10 flex items-center gap-2 transition-opacity hover:opacity-80 sm:top-8 sm:left-8'
-      >
-        <div className='relative h-8 w-8'>
+    <div className='bg-background flex min-h-dvh flex-col'>
+      <header className='flex h-14 items-center justify-between px-4 sm:px-6'>
+        <Link
+          to='/'
+          className='flex items-center gap-2 transition-opacity hover:opacity-80'
+        >
           {loading ? (
-            <Skeleton className='absolute inset-0 rounded-full' />
+            <Skeleton className='size-7 rounded-md' />
           ) : (
             <img
               src={logo}
               alt={t('Logo')}
-              className='h-8 w-8 rounded-full object-cover'
+              className='size-7 rounded-md object-cover'
             />
           )}
+          {loading ? (
+            <Skeleton className='h-5 w-20' />
+          ) : (
+            <span className='text-base leading-none font-semibold tracking-tight'>
+              {systemName}
+            </span>
+          )}
+        </Link>
+        <div className='flex items-center gap-1'>
+          <LanguageSwitcher />
+          <ThemeSwitch />
         </div>
-        {loading ? (
-          <Skeleton className='h-6 w-24' />
-        ) : (
-          <h1 className='text-xl font-medium'>{systemName}</h1>
-        )}
-      </Link>
-      <div className='container flex items-center pt-16 sm:pt-0'>
-        <div className='mx-auto flex w-full flex-col justify-center space-y-2 px-4 py-8 sm:w-[480px] sm:p-8'>
+      </header>
+
+      <main className='flex flex-1 items-center justify-center px-4 py-8'>
+        <div className='bg-card w-full max-w-md rounded-xl border p-6 shadow-sm sm:p-8'>
           {children}
         </div>
-      </div>
+      </main>
     </div>
   )
 }

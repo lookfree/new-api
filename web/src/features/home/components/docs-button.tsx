@@ -16,5 +16,30 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-export { useHomePageContent } from './use-home-page-content'
-export { useDocsLink, type DocsLink } from './use-docs-link'
+import { Link } from '@tanstack/react-router'
+import { useTranslation } from 'react-i18next'
+
+import { Button } from '@/components/ui/button'
+
+import { useDocsLink } from '../hooks/use-docs-link'
+
+export function DocsButton(props: { size?: 'default' | 'lg' }) {
+  const { t } = useTranslation()
+  const docs = useDocsLink()
+
+  return (
+    <Button
+      size={props.size}
+      variant='outline'
+      render={
+        docs.external ? (
+          <a href={docs.href} target='_blank' rel='noopener noreferrer' />
+        ) : (
+          <Link to={docs.href} />
+        )
+      }
+    >
+      {t('View docs')}
+    </Button>
+  )
+}

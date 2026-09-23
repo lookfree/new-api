@@ -16,5 +16,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-export { useHomePageContent } from './use-home-page-content'
-export { useDocsLink, type DocsLink } from './use-docs-link'
+const CONTEXT_FORMAT = new Intl.NumberFormat('en-US', {
+  maximumFractionDigits: 1,
+})
+
+/** Context window as the prototype prints it: 128K, 2M. Unknown sizes show "-". */
+export function formatContextLength(tokens?: number): string {
+  if (!tokens || !Number.isFinite(tokens) || tokens <= 0) return '-'
+  if (tokens >= 1_000_000)
+    return `${CONTEXT_FORMAT.format(tokens / 1_000_000)}M`
+  if (tokens >= 1_000) return `${CONTEXT_FORMAT.format(tokens / 1_000)}K`
+  return CONTEXT_FORMAT.format(tokens)
+}

@@ -29,7 +29,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
 
-import { type TopNavLink } from '../types'
+import type { TopNavLink } from '../types'
 
 type TopNavProps = React.HTMLAttributes<HTMLElement> & {
   links: TopNavLink[]
@@ -64,7 +64,7 @@ export function TopNav({ className, links, ...props }: TopNavProps) {
           </DropdownMenuTrigger>
           <DropdownMenuContent side='bottom' align='start'>
             {normalizedLinks.map(
-              ({ title, href, isActive, disabled, external }) => (
+              ({ title, href, hash, isActive, disabled, external }) => (
                 <DropdownMenuItem
                   key={`${title}-${href}`}
                   render={
@@ -80,6 +80,7 @@ export function TopNav({ className, links, ...props }: TopNavProps) {
                     ) : (
                       <Link
                         to={href}
+                        hash={hash}
                         className={!isActive ? 'text-muted-foreground' : ''}
                         disabled={disabled}
                       >
@@ -102,27 +103,29 @@ export function TopNav({ className, links, ...props }: TopNavProps) {
         )}
         {...props}
       >
-        {normalizedLinks.map(({ title, href, isActive, disabled, external }) =>
-          external ? (
-            <a
-              key={`${title}-${href}`}
-              href={href}
-              target='_blank'
-              rel='noopener noreferrer'
-              className={`hover:text-primary text-sm font-medium transition-colors ${isActive ? '' : 'text-muted-foreground'}`}
-            >
-              {title}
-            </a>
-          ) : (
-            <Link
-              key={`${title}-${href}`}
-              to={href}
-              disabled={disabled}
-              className={`hover:text-primary text-sm font-medium transition-colors ${isActive ? '' : 'text-muted-foreground'}`}
-            >
-              {title}
-            </Link>
-          )
+        {normalizedLinks.map(
+          ({ title, href, hash, isActive, disabled, external }) =>
+            external ? (
+              <a
+                key={`${title}-${href}`}
+                href={href}
+                target='_blank'
+                rel='noopener noreferrer'
+                className={`hover:text-primary text-sm font-medium transition-colors ${isActive ? '' : 'text-muted-foreground'}`}
+              >
+                {title}
+              </a>
+            ) : (
+              <Link
+                key={`${title}-${href}`}
+                to={href}
+                hash={hash}
+                disabled={disabled}
+                className={`hover:text-primary text-sm font-medium transition-colors ${isActive ? '' : 'text-muted-foreground'}`}
+              >
+                {title}
+              </Link>
+            )
         )}
       </nav>
     </>

@@ -20,8 +20,9 @@ import { Link } from '@tanstack/react-router'
 import { ArrowRight } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
-import { AnimateInView } from '@/components/animate-in-view'
 import { Button } from '@/components/ui/button'
+
+import { DocsButton } from '../docs-button'
 
 interface CTAProps {
   className?: string
@@ -36,49 +37,26 @@ export function CTA(props: CTAProps) {
   }
 
   return (
-    <section className='relative z-10 overflow-hidden px-6 py-24 md:py-32'>
-      {/* Gradient mesh background */}
-      <div
-        aria-hidden
-        className='absolute inset-0 -z-10 opacity-20 dark:opacity-[0.08]'
-        style={{
-          background: [
-            'radial-gradient(ellipse 50% 50% at 30% 50%, oklch(0.7 0.15 250 / 70%) 0%, transparent 70%)',
-            'radial-gradient(ellipse 40% 40% at 70% 40%, oklch(0.65 0.12 200 / 50%) 0%, transparent 70%)',
-          ].join(', '),
-        }}
-      />
-
-      <AnimateInView
-        className='mx-auto max-w-2xl text-center'
-        animation='scale-in'
-      >
-        <h2 className='text-2xl leading-tight font-bold tracking-tight md:text-4xl'>
-          {t('Ready to simplify')}
-          <br />
-          <span className='text-primary'>
-            {t('your AI integration?')}
-          </span>
-        </h2>
-        <p className='text-muted-foreground/80 mx-auto mt-5 max-w-md text-sm leading-relaxed md:text-base'>
-          {t(
-            'Deploy your own gateway and start routing requests through your configured upstream services.'
-          )}
-        </p>
-        <div className='mt-8 flex items-center justify-center gap-3'>
-          <Button className='group rounded-lg' render={<Link to='/sign-up' />}>
-            {t('Get Started')}
-            <ArrowRight className='ml-1 size-3.5 transition-transform duration-200 group-hover:translate-x-0.5' />
-          </Button>
-          <Button
-            variant='outline'
-            className='border-border/50 hover:border-border hover:bg-muted/50 rounded-lg'
-            render={<Link to='/pricing' />}
-          >
-            {t('View Pricing')}
-          </Button>
+    <section className='border-b'>
+      <div className='mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-20'>
+        <div className='bg-card rounded-xl border px-6 py-12 text-center sm:px-12'>
+          <h2 className='text-3xl font-bold tracking-tight text-balance'>
+            {t('Start building today')}
+          </h2>
+          <p className='text-muted-foreground mx-auto mt-3 max-w-xl leading-relaxed text-pretty'>
+            {t(
+              'Pay as you go — top up and send your first request in minutes.'
+            )}
+          </p>
+          <div className='mt-7 flex flex-wrap items-center justify-center gap-3'>
+            <Button size='lg' render={<Link to='/sign-up' />}>
+              {t('Get started now')}
+              <ArrowRight />
+            </Button>
+            <DocsButton size='lg' />
+          </div>
         </div>
-      </AnimateInView>
+      </div>
     </section>
   )
 }

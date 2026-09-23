@@ -26,6 +26,7 @@ import { useAuthStore } from '@/stores/auth-store'
 export type TopNavLink = {
   title: string
   href: string
+  hash?: string
   disabled?: boolean
   requiresAuth?: boolean
   external?: boolean
@@ -42,13 +43,15 @@ export type TopNavLink = {
  *   docs: true,
  *   about: true
  * }
+ *
+ * Zetone orders the links as the prototype does (model marketplace, pricing,
+ * docs, contact, console) and leaves "Home" to the logo.
  */
 export function useTopNavLinks(): TopNavLink[] {
   const { t } = useTranslation()
   const { status } = useStatus()
   const { auth } = useAuthStore()
 
-  // Parse HeaderNavModules
   const modules = useMemo(() => {
     return parseHeaderNavModulesFromStatus(
       status as Record<string, unknown> | null
@@ -62,31 +65,24 @@ export function useTopNavLinks(): TopNavLink[] {
 
   const links: TopNavLink[] = []
 
-  // Home
-  if (modules?.home !== false) {
-    links.push({ title: t('Home'), href: '/' })
-  }
-
-  // Console -> /dashboard (new console path)
-  if (modules?.console !== false) {
-    links.push({ title: t('Console'), href: '/dashboard' })
-  }
-
-  // Pricing
   const pricing = modules?.pricing
   if (pricing && typeof pricing === 'object' && pricing.enabled) {
     const requiresAuth = pricing.requireAuth && !isAuthed
-    links.push({ title: t('Model Square'), href: '/pricing', requiresAuth })
+    links.push({
+      title: t('Model marketplace'),
+      href: '/pricing',
+      requiresAuth,
+    })
   }
 
-  // Rankings
+  links.push({ title: t('Prices'), href: '/', hash: 'pricing' })
+
   const rankings = modules?.rankings
   if (rankings && typeof rankings === 'object' && rankings.enabled) {
     const requiresAuth = rankings.requireAuth && !isAuthed
     links.push({ title: t('Rankings'), href: '/rankings', requiresAuth })
   }
 
-  // Docs (supports external links)
   if (modules?.docs !== false) {
     if (docsLink) {
       links.push({ title: t('Docs'), href: docsLink, external: true })
@@ -95,14 +91,16 @@ export function useTopNavLinks(): TopNavLink[] {
     }
   }
 
-  // Contact
   if (modules?.contact !== false) {
     links.push({ title: t('Contact'), href: '/contact' })
   }
 
-  // About
   if (modules?.about !== false) {
     links.push({ title: t('About'), href: '/about' })
+  }
+
+  if (modules?.console !== false) {
+    links.push({ title: t('Console'), href: '/dashboard' })
   }
 
   return links

@@ -16,5 +16,21 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-export { useHomePageContent } from './use-home-page-content'
-export { useDocsLink, type DocsLink } from './use-docs-link'
+import { describe, expect, it } from 'vitest'
+
+import { buildHeroSamples } from '../hero-samples'
+
+describe('buildHeroSamples', () => {
+  it('orders the samples Python, Node.js, cURL as the prototype does', () => {
+    const labels = buildHeroSamples('https://api.example.com').map(
+      (sample) => sample.label
+    )
+    expect(labels).toEqual(['Python', 'Node.js', 'cURL'])
+  })
+
+  it('points every sample at the deployment v1 endpoint', () => {
+    for (const sample of buildHeroSamples('https://api.example.com')) {
+      expect(sample.code).toContain('https://api.example.com/v1')
+    }
+  })
+})

@@ -24,13 +24,9 @@ For commercial licensing, please contact support@quantumnous.com
  * through the same formatter as the model square, so the two never disagree.
  */
 
-import { Link } from '@tanstack/react-router'
-import { ArrowRight } from 'lucide-react'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { DEFAULT_TOKEN_UNIT } from '@/features/pricing/constants'
 import { usePricingData } from '@/features/pricing/hooks/use-pricing-data'
@@ -38,8 +34,10 @@ import { formatPrice } from '@/features/pricing/lib/price'
 import {
   resolveModelZone,
   ZONE_DOMESTIC,
-  ZONE_OTHER,
+  ZONE_INTERNATIONAL,
 } from '@/features/pricing/lib/zones'
+
+import { formatContextLength } from '../../lib/format'
 
 /** Rows in the preview table. */
 const FEATURED_COUNT = 8
@@ -60,43 +58,47 @@ export function PricingPreview() {
     return list.slice(0, FEATURED_COUNT)
   }, [models])
 
+  const showContext = featured.some((model) => (model.context_length ?? 0) > 0)
+
   if (isLoading || featured.length === 0) {
     return null
   }
 
   return (
-    <section id='pricing' className='border-border/40 bg-muted/20 border-b'>
-      <div className='mx-auto max-w-6xl px-6 py-16 lg:py-20'>
-        <div className='flex flex-wrap items-end justify-between gap-4'>
-          <div className='max-w-2xl'>
-            <h2 className='text-3xl font-bold tracking-tight text-balance'>
-              {t('Simple, transparent pricing')}
-            </h2>
-            <p className='text-muted-foreground mt-3 leading-relaxed'>
-              {t(
-                'Pay only for what you use. No monthly fee, no minimum spend. Top up and go.'
-              )}
-            </p>
-          </div>
-          <Button variant='outline' render={<Link to='/pricing' />}>
-            {t('View all')}
-            <ArrowRight className='size-4' />
-          </Button>
+    <section id='pricing' className='bg-muted/30 scroll-mt-14 border-b'>
+      <div className='mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:py-20'>
+        <div className='max-w-2xl'>
+          <h2 className='text-3xl font-bold tracking-tight text-balance'>
+            {t('Simple, transparent pricing')}
+          </h2>
+          <p className='text-muted-foreground mt-3 leading-relaxed text-pretty'>
+            {t(
+              'Pay only for what you use. No monthly fees, no minimums. Top up and go — balance never expires.'
+            )}
+          </p>
         </div>
 
-        <Card className='mt-8 overflow-hidden p-0'>
+        <Card className='mt-10 gap-0 p-0'>
+          <div className='border-b px-5 py-4'>
+            <h3 className='font-semibold'>{t('Popular model pricing')}</h3>
+          </div>
           <div className='overflow-x-auto'>
             <table className='w-full text-sm'>
               <thead>
                 <tr className='bg-muted/40 text-muted-foreground border-b text-left text-xs'>
                   <th className='px-5 py-3 font-medium'>{t('Model')}</th>
-                  <th className='px-5 py-3 font-medium'>{t('Vendor')}</th>
+                  <th className='px-5 py-3 font-medium'>{t('Zone')}</th>
                   <th className='px-5 py-3 text-right font-medium'>
                     {t('Input')}
                   </th>
                   <th className='px-5 py-3 text-right font-medium'>
                     {t('Output')}
                   </th>
+                  {showContext && (
+                    <th className='hidden px-5 py-3 text-right font-medium sm:table-cell'>
+                      {t('Context')}
+                    </th>
+                  )}
                 </tr>
               </thead>
               <tbody>
@@ -107,22 +109,20 @@ export function PricingPreview() {
                       key={model.model_name}
                       className='border-b last:border-0'
                     >
-                      <td className='px-5 py-3'>
-                        <span className='flex flex-wrap items-center gap-2'>
-                          <span className='font-medium'>
-                            {model.model_name}
-                          </span>
-                          {zone !== ZONE_OTHER && (
-                            <Badge variant='secondary'>
-                              {zone === ZONE_DOMESTIC
-                                ? t('Domestic models')
-                                : t('International models')}
-                            </Badge>
-                          )}
-                        </span>
+                      <td className='px-5 py-3 font-medium'>
+                        {model.model_name}
                       </td>
-                      <td className='text-muted-foreground px-5 py-3'>
-                        {model.vendor_name || '-'}
+                      <td className='px-5 py-3'>
+                        {zone === ZONE_DOMESTIC ||
+                        zone === ZONE_INTERNATIONAL ? (
+                          <span className='bg-secondary text-secondary-foreground rounded-md px-2 py-0.5 text-xs font-medium whitespace-nowrap'>
+                            {zone === ZONE_DOMESTIC
+                              ? t('Domestic models')
+                              : t('International models')}
+                          </span>
+                        ) : (
+                          <span className='text-muted-foreground'>-</span>
+                        )}
                       </td>
                       <td className='text-primary px-5 py-3 text-right tabular-nums'>
                         {formatPrice(
@@ -144,16 +144,21 @@ export function PricingPreview() {
                           usdExchangeRate
                         )}
                       </td>
+                      {showContext && (
+                        <td className='text-muted-foreground hidden px-5 py-3 text-right tabular-nums sm:table-cell'>
+                          {formatContextLength(model.context_length)}
+                        </td>
+                      )}
                     </tr>
                   )
                 })}
               </tbody>
             </table>
           </div>
+          <div className='text-muted-foreground px-5 py-3 text-xs'>
+            {t('Prices are per 1M tokens, for reference only.')}
+          </div>
         </Card>
-        <p className='text-muted-foreground/70 mt-3 text-xs'>
-          {t('Prices are per 1M tokens.')}
-        </p>
       </div>
     </section>
   )

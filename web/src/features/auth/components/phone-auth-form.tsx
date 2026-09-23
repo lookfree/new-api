@@ -26,8 +26,8 @@ For commercial licensing, please contact support@quantumnous.com
  */
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Loader2, LogIn } from 'lucide-react'
-import { useState } from 'react'
+import { Loader2 } from 'lucide-react'
+import { useState, type ReactNode } from 'react'
 import { useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
@@ -60,6 +60,11 @@ const RESEND_COOLDOWN = 60
 export function PhoneAuthForm(props: {
   redirectTo?: string
   affCode?: string
+  /** Whether the visitor has accepted the terms shown in `agreement`. */
+  agreed?: boolean
+  /** Terms checkbox, rendered just above the submit button. */
+  agreement?: ReactNode
+  onRequireAgreement?: () => void
 }) {
   const { t } = useTranslation()
   const { handleLoginSuccess } = useAuthRedirect()
@@ -107,6 +112,10 @@ export function PhoneAuthForm(props: {
   }
 
   async function onSubmit(values: PhoneFormValues) {
+    if (props.agreed === false) {
+      props.onRequireAgreement?.()
+      return
+    }
     setIsSubmitting(true)
     try {
       const res = await phoneLogin(
@@ -139,6 +148,7 @@ export function PhoneAuthForm(props: {
               <FormLabel>{t('Phone number')}</FormLabel>
               <FormControl>
                 <Input
+                  className='h-10 px-3'
                   type='tel'
                   autoComplete='tel'
                   inputMode='numeric'
@@ -160,6 +170,7 @@ export function PhoneAuthForm(props: {
               <div className='flex gap-2'>
                 <FormControl>
                   <Input
+                    className='h-10 px-3'
                     autoComplete='one-time-code'
                     inputMode='numeric'
                     placeholder={t('Enter code')}
@@ -169,13 +180,13 @@ export function PhoneAuthForm(props: {
                 <Button
                   type='button'
                   variant='outline'
-                  className='shrink-0'
+                  className='h-10 shrink-0'
                   onClick={handleSendCode}
                   disabled={isSending || isCoolingDown}
                 >
                   {isSending && <Loader2 className='size-4 animate-spin' />}
                   {isCoolingDown
-                    ? t('{{seconds}}s', { seconds: secondsLeft })
+                    ? t('Resend in {{seconds}}s', { seconds: secondsLeft })
                     : t('Get code')}
                 </Button>
               </div>
@@ -192,16 +203,10 @@ export function PhoneAuthForm(props: {
           />
         )}
 
-        <Button
-          type='submit'
-          className='mt-2 w-full justify-center gap-2'
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? (
-            <Loader2 className='size-4 animate-spin' />
-          ) : (
-            <LogIn className='size-4' />
-          )}
+        {props.agreement}
+
+        <Button type='submit' className='w-full' disabled={isSubmitting}>
+          {isSubmitting && <Loader2 className='animate-spin' />}
           {t('Sign in')}
         </Button>
       </form>

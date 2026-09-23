@@ -16,5 +16,19 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-export { useHomePageContent } from './use-home-page-content'
-export { useDocsLink, type DocsLink } from './use-docs-link'
+import { useStatus } from '@/hooks/use-status'
+
+export type DocsLink = {
+  href: string
+  external: boolean
+}
+
+/** The operator's docs link when configured, otherwise the built-in docs page. */
+export function useDocsLink(): DocsLink {
+  const { status } = useStatus()
+  const configured = (status?.docs_link as string | undefined)?.trim()
+  if (configured) {
+    return { href: configured, external: configured.startsWith('http') }
+  }
+  return { href: '/docs', external: false }
+}

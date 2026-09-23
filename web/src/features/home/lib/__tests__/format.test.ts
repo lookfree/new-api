@@ -16,5 +16,25 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-export { useHomePageContent } from './use-home-page-content'
-export { useDocsLink, type DocsLink } from './use-docs-link'
+import { describe, expect, it } from 'vitest'
+
+import { formatContextLength } from '../format'
+
+describe('formatContextLength', () => {
+  it('prints thousands with a K suffix', () => {
+    expect(formatContextLength(128_000)).toBe('128K')
+  })
+
+  it('prints millions with an M suffix', () => {
+    expect(formatContextLength(2_000_000)).toBe('2M')
+  })
+
+  it('keeps one decimal for fractional sizes', () => {
+    expect(formatContextLength(1_500_000)).toBe('1.5M')
+  })
+
+  it('shows a dash when the size is unknown', () => {
+    expect(formatContextLength(undefined)).toBe('-')
+    expect(formatContextLength(0)).toBe('-')
+  })
+})

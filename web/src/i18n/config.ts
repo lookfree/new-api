@@ -45,7 +45,11 @@ i18n
   .init({
     resources,
     fallbackLng: 'en',
-    supportedLngs: ['en', 'zhCN', 'fr', 'ru', 'ja', 'vi', 'zhTW'],
+    // Zetone only ships zh/en for now (see INTERFACE_LANGUAGE_OPTIONS in
+    // ./languages.ts). Keeping the other locale bundles in `resources` but
+    // out of `supportedLngs` means a browser set to French/Japanese/etc.
+    // still falls back to English instead of picking up a hidden language.
+    supportedLngs: ['en', 'zhCN'],
     load: 'currentOnly',
     nsSeparator: false, // Allow literal colons in keys (e.g., URLs, labels)
     debug: import.meta.env.DEV,

@@ -33,6 +33,8 @@ import type {
   AffiliateTransferResponse,
   BillingHistoryResponse,
   CompleteOrderRequest,
+  AirwallexPaymentRequest,
+  AirwallexPaymentResponse,
   CreemPaymentRequest,
   CreemPaymentResponse,
   WaffoPaymentRequest,
@@ -140,6 +142,18 @@ export async function requestCreemPayment(
   request: CreemPaymentRequest
 ): Promise<CreemPaymentResponse> {
   const res = await api.post('/api/user/creem/pay', request, {
+    skipBusinessError: true,
+  } as Record<string, unknown>)
+  return res.data
+}
+
+/**
+ * Create a pending Airwallex top-up and its PaymentIntent
+ */
+export async function requestAirwallexPayment(
+  request: AirwallexPaymentRequest
+): Promise<AirwallexPaymentResponse> {
+  const res = await api.post('/api/user/airwallex/pay', request, {
     skipBusinessError: true,
   } as Record<string, unknown>)
   return res.data

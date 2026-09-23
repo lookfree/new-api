@@ -23,6 +23,8 @@ import { Wallet } from '@/features/wallet'
 
 const walletSearchSchema = z.object({
   show_history: z.boolean().optional(),
+  // Set by Airwallex's success redirect; anything else is ignored.
+  airwallex: z.literal('success').optional().catch(undefined),
 })
 
 export const Route = createFileRoute('/_authenticated/wallet/')({
@@ -31,6 +33,11 @@ export const Route = createFileRoute('/_authenticated/wallet/')({
 })
 
 function RouteComponent() {
-  const { show_history } = Route.useSearch()
-  return <Wallet initialShowHistory={show_history} />
+  const { show_history, airwallex } = Route.useSearch()
+  return (
+    <Wallet
+      initialShowHistory={show_history}
+      airwallexReturned={airwallex === 'success'}
+    />
+  )
 }

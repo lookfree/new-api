@@ -58,6 +58,11 @@ import { SettingsPageFormActions } from '../components/settings-page-context'
 import { SettingsSection } from '../components/settings-section'
 import { useUpdateOption } from '../hooks/use-update-option'
 import { safeNumberFieldProps } from '../utils/numeric-field'
+import {
+  getAirwallexOptionUpdates,
+  type AirwallexSettingsValues,
+} from './airwallex-options'
+import { AirwallexSettingsSection } from './airwallex-settings-section'
 import { AmountDiscountVisualEditor } from './amount-discount-visual-editor'
 import { AmountOptionsVisualEditor } from './amount-options-visual-editor'
 import { CreemProductsVisualEditor } from './creem-products-visual-editor'
@@ -159,6 +164,10 @@ const paymentSchema = z.object({
       })
     }
   }),
+  AirwallexEnabled: z.boolean(),
+  AirwallexClientId: z.string(),
+  AirwallexApiKey: z.string(),
+  AirwallexWebhookSecret: z.string(),
   WaffoEnabled: z.boolean(),
   WaffoApiKey: z.string(),
   WaffoPrivateKey: z.string(),
@@ -182,7 +191,9 @@ type PaymentFormValues = z.infer<typeof paymentSchema>
 type WaffoFormFieldValues = Omit<WaffoSettingsValues, 'WaffoPayMethods'>
 type PaymentBaseFormValues = Omit<
   PaymentFormValues,
-  keyof WaffoFormFieldValues | keyof WaffoPancakeSettingsValues
+  | keyof WaffoFormFieldValues
+  | keyof WaffoPancakeSettingsValues
+  | keyof AirwallexSettingsValues
 >
 
 const CURRENT_COMPLIANCE_TERMS_VERSION = 'v1'
@@ -197,6 +208,7 @@ type PaymentComplianceDefaults = {
 
 type PaymentSettingsSectionProps = {
   defaultValues: PaymentBaseFormValues
+  airwallexDefaultValues: AirwallexSettingsValues
   waffoDefaultValues: WaffoSettingsValues
   waffoPancakeDefaultValues: WaffoPancakeSettingsValues
   waffoPancakeProvisionedStoreID?: string
@@ -215,6 +227,7 @@ function parseWaffoPayMethods(value: string): PayMethod[] {
 
 export function PaymentSettingsSection({
   defaultValues,
+  airwallexDefaultValues,
   waffoDefaultValues,
   waffoPancakeDefaultValues,
   waffoPancakeProvisionedStoreID,
@@ -227,10 +240,16 @@ export function PaymentSettingsSection({
   const initialFormValues = React.useMemo<PaymentFormValues>(
     () => ({
       ...defaultValues,
+      ...airwallexDefaultValues,
       ...waffoDefaultValues,
       ...waffoPancakeDefaultValues,
     }),
-    [defaultValues, waffoDefaultValues, waffoPancakeDefaultValues]
+    [
+      defaultValues,
+      airwallexDefaultValues,
+      waffoDefaultValues,
+      waffoPancakeDefaultValues,
+    ]
   )
   const initialRef = React.useRef(initialFormValues)
   const defaultsSignature = React.useMemo(
@@ -417,6 +436,16 @@ export function PaymentSettingsSection({
   }, [defaultsSignature, form])
 
   const onSubmit = async (values: PaymentFormValues) => {
+    // Only the client id can be checked here: the API key and webhook secret
+    // are never returned by the server, so a blank field may already be set.
+    if (values.AirwallexEnabled && !values.AirwallexClientId.trim()) {
+      form.setError('AirwallexClientId', {
+        message: 'Client ID is required to enable Airwallex',
+      })
+      toast.error(t('Client ID is required to enable Airwallex'))
+      return
+    }
+
     const sanitized = {
       PayAddress: removeTrailingSlash(values.PayAddress),
       EpayId: values.EpayId.trim(),
@@ -628,6 +657,8 @@ export function PaymentSettingsSection({
     ) {
       updates.push({ key: 'CreemProducts', value: sanitized.CreemProducts })
     }
+
+    updates.push(...getAirwallexOptionUpdates(values, initialRef.current))
 
     if (sanitized.WaffoEnabled !== initial.WaffoEnabled) {
       updates.push({ key: 'WaffoEnabled', value: sanitized.WaffoEnabled })
@@ -877,8 +908,9 @@ export function PaymentSettingsSection({
           />
           <Tabs defaultValue='general' className='min-w-0'>
             <div className='overflow-x-auto pb-1'>
-              <TabsList className='grid min-w-[44rem] grid-cols-6'>
+              <TabsList className='grid min-w-[52rem] grid-cols-7'>
                 <TabsTrigger value='general'>{t('General')}</TabsTrigger>
+                <TabsTrigger value='airwallex'>Airwallex</TabsTrigger>
                 <TabsTrigger value='epay'>Epay</TabsTrigger>
                 <TabsTrigger value='stripe'>{t('Stripe')}</TabsTrigger>
                 <TabsTrigger value='creem'>Creem</TabsTrigger>
@@ -1132,6 +1164,13 @@ export function PaymentSettingsSection({
                   />
                 </div>
               </div>
+            </TabsContent>
+
+            <TabsContent
+              value='airwallex'
+              className={paymentTabContentClassName}
+            >
+              <AirwallexSettingsSection />
             </TabsContent>
 
             <TabsContent value='epay' className={paymentTabContentClassName}>

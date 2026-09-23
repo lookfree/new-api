@@ -16,8 +16,6 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { DEFAULT_DISCOUNT_RATE } from '../constants'
-
 // ============================================================================
 // Wallet-specific Formatting Functions
 // ============================================================================
@@ -62,36 +60,34 @@ export function formatCurrency(amount: number | string): string {
 }
 
 /**
- * Get discount label for display (e.g., "20% OFF")
+ * Whole-number percent taken off by a discount rate (0.8 -> 20), or 0 when the
+ * rate gives no discount.
  */
-export function getDiscountLabel(discount: number): string {
-  if (discount >= DEFAULT_DISCOUNT_RATE) {
-    return ''
+export function getDiscountPercentOff(discount: number): number {
+  if (!Number.isFinite(discount) || discount <= 0 || discount >= 1) {
+    return 0
   }
-  const off = Math.round((1 - discount) * 100)
-  return `${off}% OFF`
+  return Math.round((1 - discount) * 100)
 }
 
 /**
- * Calculate pricing details for a preset amount
+ * Rough value of a balance in the local currency, at the price customers pay
+ * for one unit of credit. Returns null when either rate is unusable, so the
+ * caller shows nothing rather than a wrong figure.
  */
-export function calculatePresetPricing(
-  presetValue: number,
-  priceRatio: number,
-  discount: number,
-  usdExchangeRate: number = 1
-) {
-  const originalPrice = presetValue * priceRatio
-  const actualPrice = originalPrice * discount
-  const savedAmount = originalPrice - actualPrice
-  const hasDiscount = discount < 1.0
-  const displayValue = presetValue * usdExchangeRate
-
-  return {
-    displayValue,
-    originalPrice,
-    actualPrice,
-    savedAmount,
-    hasDiscount,
+export function estimateLocalAmount(
+  quota: number,
+  quotaPerUnit: number,
+  priceRatio: number
+): number | null {
+  if (
+    !Number.isFinite(quota) ||
+    !Number.isFinite(quotaPerUnit) ||
+    !Number.isFinite(priceRatio) ||
+    quotaPerUnit <= 0 ||
+    priceRatio <= 0
+  ) {
+    return null
   }
+  return (quota / quotaPerUnit) * priceRatio
 }

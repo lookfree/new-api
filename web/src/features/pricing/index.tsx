@@ -21,42 +21,59 @@ import { useTranslation } from 'react-i18next'
 
 import { PublicLayout } from '@/components/layout'
 import { PageTransition } from '@/components/page-transition'
+import { cn } from '@/lib/utils'
 
 import {
   LoadingSkeleton,
   EmptyState,
   SearchBar,
-  PricingTable,
-  PricingSidebar,
-  PricingToolbar,
   ModelCardGrid,
   ModelDetailsDrawer,
+  ModelQuickDialog,
   ZoneTabs,
 } from './components'
-import { EXCLUDED_GROUPS, VIEW_MODES } from './constants'
+import { VIEW_MODES } from './constants'
 import { useFilters } from './hooks/use-filters'
 import { usePricingData } from './hooks/use-pricing-data'
 import {
   availableZoneTabs,
-  countModelsByZone,
   filterModelsByZone,
+  resolveModelZone,
   ZONE_ALL,
   type ZoneFilter,
 } from './lib/zones'
 
 export function Pricing() {
-  const { t } = useTranslation()
-  const [selectedModelName, setSelectedModelName] = useState<string | null>(
-    null
+  return (
+    <PublicLayout showMainContainer={false} showFooter>
+      <PageTransition className='mx-auto w-full max-w-6xl px-4 pt-[calc(57px+4rem)] pb-16 sm:px-6 lg:pt-[calc(57px+5rem)] lg:pb-20'>
+        <ModelMarketplace variant='public' />
+      </PageTransition>
+    </PublicLayout>
   )
-  // Zetone: the zone tab narrows the model list before every other filter, so
-  // the vendor / tag / group facets always describe the zone in view.
+}
+
+/**
+ * `public` prints the heading like the home page's model section (larger,
+ * bolder, with room above the toolbar); `console` is the in-app page heading.
+ */
+export function ModelMarketplace(props: { variant?: 'console' | 'public' }) {
+  const { t } = useTranslation()
+  const isPublic = props.variant === 'public'
+  // The quick dialog opens first; it keeps its model while closing so it can
+  // fade out, and hands over to the full drawer on request.
+  const [dialog, setDialog] = useState<{
+    modelName: string
+    focusTry: boolean
+    open: boolean
+  } | null>(null)
+  const [drawerModelName, setDrawerModelName] = useState<string | null>(null)
+  // Zetone: the zone tab narrows the model list before the search box.
   const [zoneFilter, setZoneFilter] = useState<ZoneFilter>(ZONE_ALL)
 
   const {
     models,
     vendorZones,
-    vendors,
     groupRatio,
     usableGroup,
     endpointMap,
@@ -73,11 +90,6 @@ export function Pricing() {
     [allModels, vendorZones]
   )
 
-  const zoneCounts = useMemo(
-    () => countModelsByZone(allModels, vendorZones),
-    [allModels, vendorZones]
-  )
-
   // A zone can vanish when the operator re-maps vendors; fall back to `all`
   // instead of rendering an empty page with no active tab.
   const activeZone = zoneTabs.includes(zoneFilter) ? zoneFilter : ZONE_ALL
@@ -89,52 +101,44 @@ export function Pricing() {
 
   const {
     searchInput,
-    sortBy,
-    vendorFilter,
-    groupFilter,
-    quotaTypeFilter,
-    endpointTypeFilter,
-    tagFilter,
     tokenUnit,
-    viewMode,
     showRechargePrice,
+    groupFilter,
     setSearchInput,
-    setSortBy,
-    setVendorFilter,
-    setGroupFilter,
-    setQuotaTypeFilter,
-    setEndpointTypeFilter,
-    setTagFilter,
-    setTokenUnit,
-    setViewMode,
-    setShowRechargePrice,
     filteredModels,
     hasActiveFilters,
-    activeFilterCount,
-    availableTags,
     clearFilters,
     clearSearch,
   } = useFilters(zoneScopedModels)
 
   const handleModelClick = useCallback((modelName: string) => {
-    setSelectedModelName(modelName)
+    setDialog({ modelName, focusTry: false, open: true })
   }, [])
 
-  const selectedModel = useMemo(
+  const handleModelTry = useCallback((modelName: string) => {
+    setDialog({ modelName, focusTry: true, open: true })
+  }, [])
+
+  const dialogModel = useMemo(
     () =>
-      selectedModelName
-        ? (models || []).find(
-            (model) => model.model_name === selectedModelName
-          ) || null
+      dialog
+        ? allModels.find((model) => model.model_name === dialog.modelName) ||
+          null
         : null,
-    [models, selectedModelName]
+    [allModels, dialog]
   )
 
-  const availableGroups = useMemo(
+  const drawerModel = useMemo(
     () =>
-      Object.keys(usableGroup || {}).filter(
-        (g) => !EXCLUDED_GROUPS.includes(g)
-      ),
+      drawerModelName
+        ? allModels.find((model) => model.model_name === drawerModelName) ||
+          null
+        : null,
+    [allModels, drawerModelName]
+  )
+
+  const usableGroupNames = useMemo(
+    () => Object.keys(usableGroup || {}),
     [usableGroup]
   )
 
@@ -143,193 +147,123 @@ export function Pricing() {
     clearSearch()
   }, [clearFilters, clearSearch])
 
-  const renderPricingContent = () => {
-    if (filteredModels.length === 0) {
-      return (
-        <EmptyState
-          searchQuery={searchInput}
-          hasActiveFilters={hasActiveFilters}
-          onClearFilters={handleClearAll}
-        />
-      )
-    }
-
-    if (viewMode === VIEW_MODES.CARD) {
-      return (
-        <ModelCardGrid
-          models={filteredModels}
-          onModelClick={handleModelClick}
-          priceRate={priceRate}
-          usdExchangeRate={usdExchangeRate}
-          tokenUnit={tokenUnit}
-          showRechargePrice={showRechargePrice}
-          selectedGroup={groupFilter}
-        />
-      )
-    }
-
-    return (
-      <PricingTable
+  let content
+  if (isLoading) {
+    content = <LoadingSkeleton viewMode={VIEW_MODES.CARD} />
+  } else if (filteredModels.length === 0) {
+    content = (
+      <EmptyState
+        searchQuery={searchInput}
+        hasActiveFilters={hasActiveFilters}
+        onClearFilters={handleClearAll}
+      />
+    )
+  } else {
+    content = (
+      <ModelCardGrid
         models={filteredModels}
+        onModelClick={handleModelClick}
+        onModelTry={handleModelTry}
         priceRate={priceRate}
         usdExchangeRate={usdExchangeRate}
         tokenUnit={tokenUnit}
         showRechargePrice={showRechargePrice}
         selectedGroup={groupFilter}
-        onModelClick={handleModelClick}
       />
     )
   }
 
-  if (isLoading) {
-    return (
-      <PublicLayout showMainContainer={false}>
-        <div className='mx-auto w-full max-w-[1800px] px-3 pt-16 pb-8 sm:px-6 sm:pt-20 sm:pb-10 xl:px-8'>
-          <LoadingSkeleton viewMode={viewMode} />
-        </div>
-      </PublicLayout>
-    )
-  }
-
   return (
-    <PublicLayout showMainContainer={false}>
-      <div className='relative'>
-        <div
-          aria-hidden
-          className='pointer-events-none absolute inset-x-0 top-0 h-[600px] opacity-20 dark:opacity-[0.10]'
-          style={{
-            background: [
-              'radial-gradient(ellipse 60% 50% at 20% 20%, color-mix(in oklch, var(--primary) 80%, transparent) 0%, transparent 70%)',
-              'radial-gradient(ellipse 50% 40% at 80% 15%, color-mix(in oklch, var(--chart-3) 55%, transparent) 0%, transparent 70%)',
-              'radial-gradient(ellipse 40% 35% at 50% 70%, color-mix(in oklch, var(--primary) 35%, transparent) 0%, transparent 70%)',
-            ].join(', '),
-            maskImage:
-              'linear-gradient(to bottom, black 40%, transparent 100%)',
-            WebkitMaskImage:
-              'linear-gradient(to bottom, black 40%, transparent 100%)',
-          }}
-        />
-        <PageTransition className='relative mx-auto w-full max-w-[1800px] px-3 pt-16 pb-8 sm:px-6 sm:pt-20 sm:pb-10 xl:px-8'>
-          <header className='mx-auto mb-5 max-w-3xl pt-5 text-center sm:mb-10 sm:pt-10'>
-            <h1 className='text-[clamp(2rem,5.5vw,3.5rem)] leading-[1.15] font-bold tracking-tight'>
-              {t('Model Square')}
-            </h1>
-            <p className='text-muted-foreground/80 mt-3 text-sm sm:mt-4 sm:text-base'>
-              {t('This site currently has {{count}} models enabled', {
-                count: models?.length || 0,
-              })}
-            </p>
-            <p className='text-muted-foreground/60 mx-auto mt-2 max-w-2xl text-xs leading-relaxed sm:text-sm'>
-              {t(
-                'Discover curated AI models, compare pricing and capabilities, and choose the right model for every scenario.'
-              )}
-            </p>
-            <SearchBar
-              value={searchInput}
-              onChange={setSearchInput}
-              onClear={clearSearch}
-              placeholder={t(
-                'Search model name, provider, endpoint, or tag...'
-              )}
-              className='mx-auto mt-4 max-w-2xl sm:mt-6'
-            />
-            {zoneTabs.length > 0 && (
-              <div className='mt-4 flex justify-center sm:mt-5'>
-                <ZoneTabs
-                  zones={zoneTabs}
-                  value={activeZone}
-                  counts={zoneCounts}
-                  total={allModels.length}
-                  onChange={setZoneFilter}
-                />
-              </div>
-            )}
-          </header>
-
-          <div className='grid gap-4 xl:grid-cols-[330px_minmax(0,1fr)]'>
-            <PricingSidebar
-              quotaTypeFilter={quotaTypeFilter}
-              endpointTypeFilter={endpointTypeFilter}
-              vendorFilter={vendorFilter}
-              groupFilter={groupFilter}
-              tagFilter={tagFilter}
-              onQuotaTypeChange={setQuotaTypeFilter}
-              onEndpointTypeChange={setEndpointTypeFilter}
-              onVendorChange={setVendorFilter}
-              onGroupChange={setGroupFilter}
-              onTagChange={setTagFilter}
-              vendors={vendors || []}
-              groups={availableGroups}
-              groupRatios={groupRatio}
-              tags={availableTags}
-              // Zone-scoped so the vendor facet counts (and the vendors shown,
-              // which are filtered to count > 0) describe the zone in view.
-              models={zoneScopedModels}
-              hasActiveFilters={hasActiveFilters}
-              onClearFilters={clearFilters}
-              className='hover-scrollbar sticky top-4 hidden max-h-[calc(100dvh-2rem)] self-start overflow-y-auto xl:block'
-            />
-
-            <main className='min-w-0 space-y-4'>
-              <PricingToolbar
-                filteredCount={filteredModels.length}
-                totalCount={models?.length}
-                sortBy={sortBy}
-                onSortChange={setSortBy}
-                tokenUnit={tokenUnit}
-                onTokenUnitChange={setTokenUnit}
-                showRechargePrice={showRechargePrice}
-                onRechargePriceChange={setShowRechargePrice}
-                viewMode={viewMode}
-                onViewModeChange={setViewMode}
-                quotaTypeFilter={quotaTypeFilter}
-                endpointTypeFilter={endpointTypeFilter}
-                vendorFilter={vendorFilter}
-                groupFilter={groupFilter}
-                tagFilter={tagFilter}
-                onQuotaTypeChange={setQuotaTypeFilter}
-                onEndpointTypeChange={setEndpointTypeFilter}
-                onVendorChange={setVendorFilter}
-                onGroupChange={setGroupFilter}
-                onTagChange={setTagFilter}
-                vendors={vendors || []}
-                groups={availableGroups}
-                groupRatios={groupRatio}
-                tags={availableTags}
-                models={zoneScopedModels}
-                hasActiveFilters={hasActiveFilters}
-                activeFilterCount={activeFilterCount}
-                onClearFilters={clearFilters}
-              />
-
-              {renderPricingContent()}
-            </main>
-          </div>
-
-          {selectedModel && (
-            <ModelDetailsDrawer
-              open={Boolean(selectedModel)}
-              onOpenChange={(open) => {
-                if (!open) setSelectedModelName(null)
-              }}
-              model={selectedModel}
-              groupRatio={groupRatio || {}}
-              usableGroup={usableGroup || {}}
-              endpointMap={
-                (endpointMap as Record<
-                  string,
-                  { path?: string; method?: string }
-                >) || {}
-              }
-              autoGroups={autoGroups || []}
-              priceRate={priceRate ?? 1}
-              usdExchangeRate={usdExchangeRate ?? 1}
-              tokenUnit={tokenUnit}
-              showRechargePrice={showRechargePrice}
-            />
+    <div className='space-y-6'>
+      <div className={cn(isPublic && 'max-w-2xl pb-4')}>
+        <h2
+          className={cn(
+            isPublic
+              ? 'text-3xl font-bold tracking-tight text-balance'
+              : 'text-2xl font-semibold tracking-tight'
           )}
-        </PageTransition>
+        >
+          {t('Model marketplace')}
+        </h2>
+        <p
+          className={cn(
+            'text-muted-foreground',
+            isPublic ? 'mt-3 leading-relaxed text-pretty' : 'mt-1'
+          )}
+        >
+          {t(
+            'Access mainstream models from China and abroad with one API and unified billing.'
+          )}
+        </p>
       </div>
-    </PublicLayout>
+
+      <div className='flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
+        {zoneTabs.length > 0 ? (
+          <ZoneTabs
+            zones={zoneTabs}
+            value={activeZone}
+            onChange={setZoneFilter}
+          />
+        ) : (
+          <span />
+        )}
+        <SearchBar
+          value={searchInput}
+          onChange={setSearchInput}
+          onClear={clearSearch}
+          placeholder={t('Search models...')}
+          className='w-full sm:max-w-xs'
+        />
+      </div>
+
+      {content}
+
+      <ModelQuickDialog
+        model={dialogModel}
+        open={Boolean(dialog?.open)}
+        focusTry={dialog?.focusTry}
+        zone={
+          dialogModel ? resolveModelZone(dialogModel, vendorZones) : undefined
+        }
+        tokenUnit={tokenUnit}
+        showRechargePrice={showRechargePrice}
+        priceRate={priceRate ?? 1}
+        usdExchangeRate={usdExchangeRate ?? 1}
+        selectedGroup={groupFilter}
+        usableGroups={usableGroupNames}
+        onOpenChange={(open) => {
+          if (!open) {
+            setDialog((current) => current && { ...current, open: false })
+          }
+        }}
+        onOpenFullDetails={(model) => {
+          setDialog((current) => current && { ...current, open: false })
+          setDrawerModelName(model.model_name)
+        }}
+      />
+
+      {drawerModel && (
+        <ModelDetailsDrawer
+          open={Boolean(drawerModel)}
+          onOpenChange={(open) => {
+            if (!open) setDrawerModelName(null)
+          }}
+          model={drawerModel}
+          groupRatio={groupRatio || {}}
+          usableGroup={usableGroup || {}}
+          endpointMap={
+            (endpointMap as Record<
+              string,
+              { path?: string; method?: string }
+            >) || {}
+          }
+          autoGroups={autoGroups || []}
+          priceRate={priceRate ?? 1}
+          usdExchangeRate={usdExchangeRate ?? 1}
+          tokenUnit={tokenUnit}
+          showRechargePrice={showRechargePrice}
+        />
+      )}
+    </div>
   )
 }

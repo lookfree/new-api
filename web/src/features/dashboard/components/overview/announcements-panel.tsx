@@ -20,7 +20,6 @@ import { Megaphone } from 'lucide-react'
 import { memo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { IconBadge } from '@/components/ui/icon-badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useAnnouncements } from '@/features/dashboard/hooks/use-status-data'
 import { getPreviewText } from '@/features/dashboard/lib'
@@ -61,9 +60,7 @@ export function AnnouncementsPanel() {
     <PanelWrapper
       title={
         <span className='flex items-center gap-2'>
-          <IconBadge tone='warning' size='sm'>
-            <Megaphone />
-          </IconBadge>
+          <Megaphone className='text-primary size-4' aria-hidden='true' />
           {t('Announcements')}
         </span>
       }
@@ -72,7 +69,6 @@ export function AnnouncementsPanel() {
       empty={!list.length}
       emptyMessage={t('No announcements at this time')}
       height='h-72'
-      contentClassName='p-0'
     >
       <ScrollArea className='h-72'>
         <div>
@@ -84,8 +80,8 @@ export function AnnouncementsPanel() {
                 type='button'
                 onClick={() => handleAnnouncementClick(item)}
                 className={cn(
-                  'group hover:bg-muted/40 w-full px-3 py-3 text-left transition-colors sm:px-5 sm:py-3.5',
-                  idx < list.length - 1 && 'border-border/60 border-b'
+                  'group hover:bg-muted/40 w-full px-5 py-3.5 text-left transition-colors',
+                  idx < list.length - 1 && 'border-b'
                 )}
               >
                 <div className='flex items-start gap-2.5'>

@@ -175,8 +175,8 @@ export function CNPaymentSection(props: {
   }
 
   return (
-    <div className='space-y-2.5 sm:space-y-3'>
-      <Label className='text-muted-foreground text-xs font-medium tracking-wider uppercase'>
+    <div className='mt-4 space-y-3 border-t pt-4'>
+      <Label className='text-muted-foreground text-sm font-normal'>
         {t('Alipay & WeChat Pay')}
       </Label>
       {needsOwnInput && (
@@ -194,7 +194,8 @@ export function CNPaymentSection(props: {
         {alipayEnabled && (
           <Button
             variant='outline'
-            className='h-11 justify-start gap-2'
+            size='lg'
+            className='justify-start gap-2'
             onClick={handleAlipay}
             disabled={pending !== null}
           >
@@ -209,7 +210,8 @@ export function CNPaymentSection(props: {
         {wechatEnabled && (
           <Button
             variant='outline'
-            className='h-11 justify-start gap-2'
+            size='lg'
+            className='justify-start gap-2'
             onClick={handleWechat}
             disabled={pending !== null}
           >

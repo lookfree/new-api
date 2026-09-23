@@ -16,10 +16,9 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
+import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 
-import { Checkbox } from '@/components/ui/checkbox'
-import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
 
 import type { SystemStatus } from '../types'
@@ -45,53 +44,43 @@ export function LegalConsent({
     return null
   }
 
-  const handleChange = (value: boolean) => {
-    onCheckedChange(value === true)
-  }
-
   return (
-    <div
+    <label
       className={cn(
-        'border-border/60 bg-muted/40 flex items-start gap-3 rounded-md border p-3',
+        'text-muted-foreground flex items-start gap-2 text-xs leading-relaxed',
         className
       )}
     >
-      <Checkbox
-        id='legal-consent'
+      <input
+        type='checkbox'
         checked={checked}
-        onCheckedChange={handleChange}
-        className='mt-0.5'
+        onChange={(event) => onCheckedChange(event.target.checked)}
+        className='accent-primary mt-0.5 size-4 shrink-0'
       />
-      <Label
-        htmlFor='legal-consent'
-        className='text-muted-foreground items-start gap-1 text-left text-xs leading-5 font-normal'
-      >
-        <span>
-          {t('I have read and agree to the')}{' '}
-          {hasUserAgreement && (
-            <a
-              href='/user-agreement'
-              target='_blank'
-              rel='noopener noreferrer'
-              className='text-primary hover:underline'
-            >
-              {t('User Agreement')}
-            </a>
-          )}
-          {hasUserAgreement && hasPrivacyPolicy && ' and the '}
-          {hasPrivacyPolicy && (
-            <a
-              href='/privacy-policy'
-              target='_blank'
-              rel='noopener noreferrer'
-              className='text-primary hover:underline'
-            >
-              {t('Privacy Policy')}
-            </a>
-          )}
-          .
-        </span>
-      </Label>
-    </div>
+      <span>
+        {t('I have read and agree to the')}{' '}
+        {hasUserAgreement && (
+          <Link
+            to='/user-agreement'
+            target='_blank'
+            className='text-primary hover:underline'
+          >
+            {t('Terms of Service')}
+          </Link>
+        )}
+        {hasUserAgreement && hasPrivacyPolicy && (
+          <> {t('and', { context: 'terms' })} </>
+        )}
+        {hasPrivacyPolicy && (
+          <Link
+            to='/privacy-policy'
+            target='_blank'
+            className='text-primary hover:underline'
+          >
+            {t('Privacy Policy')}
+          </Link>
+        )}
+      </span>
+    </label>
   )
 }

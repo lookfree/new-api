@@ -18,8 +18,17 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { createFileRoute } from '@tanstack/react-router'
 
+import { ConsolePage } from '@/components/layout'
 import { Invite } from '@/features/invite'
 
 export const Route = createFileRoute('/_authenticated/invite/')({
-  component: Invite,
+  component: InvitePage,
 })
+
+function InvitePage() {
+  return (
+    <ConsolePage>
+      <Invite />
+    </ConsolePage>
+  )
+}

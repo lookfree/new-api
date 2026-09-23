@@ -42,6 +42,11 @@ export type StripePaymentResponse = ApiResponse<{ pay_link: string }>
 export type AffiliateCodeResponse = ApiResponse<string>
 export type AffiliateTransferResponse = ApiResponse
 export type CreemPaymentResponse = ApiResponse<{ checkout_url: string }>
+/**
+ * Airwallex answers a failed request with `{ message: 'error', data: <reason> }`
+ * (data is a string), unlike the success shape, so `data` is a union.
+ */
+export type AirwallexPaymentResponse = ApiResponse<AirwallexIntent | string>
 export type WaffoPaymentResponse = ApiResponse<
   { payment_url?: string } | string
 >
@@ -59,6 +64,27 @@ export type WaffoPancakePaymentResponse = ApiResponse<
     }
   | string
 >
+
+/**
+ * PaymentIntent created for a pending top-up. The customer pays on Airwallex's
+ * hosted page; the balance is credited later by Airwallex's webhook.
+ */
+export interface AirwallexIntent {
+  /** Airwallex PaymentIntent id */
+  intent_id: string
+  /** Secret that authorizes the browser to open this intent's checkout */
+  client_secret: string
+  /** Currency the intent is charged in */
+  currency: string
+}
+
+/**
+ * Airwallex payment request
+ */
+export interface AirwallexPaymentRequest {
+  /** Topup amount (whole units, same as the other gateways) */
+  amount: number
+}
 
 /**
  * Creem product configuration
@@ -146,6 +172,8 @@ export interface TopupInfo {
   waffo_pay_methods?: WaffoPayMethod[]
   /** Minimum topup amount for Waffo */
   waffo_min_topup?: number
+  /** Whether Airwallex topup is enabled */
+  enable_airwallex_topup?: boolean
   /** Whether Waffo Pancake topup is enabled */
   enable_waffo_pancake_topup?: boolean
   /** Minimum topup amount for Waffo Pancake */

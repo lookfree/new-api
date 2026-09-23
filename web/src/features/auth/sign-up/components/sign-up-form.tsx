@@ -56,8 +56,12 @@ import { cn } from '@/lib/utils'
 
 export function SignUpForm({
   className,
+  affiliateField,
   ...props
-}: React.HTMLAttributes<HTMLFormElement>) {
+}: React.HTMLAttributes<HTMLFormElement> & {
+  /** Invite-code field rendered just above the terms checkbox. */
+  affiliateField?: ReactNode
+}) {
   const { t } = useTranslation()
   const [isLoading, setIsLoading] = useState(false)
   const [verificationCode, setVerificationCode] = useState('')
@@ -252,10 +256,14 @@ export function SignUpForm({
           control={form.control}
           name='username'
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t('Username')}</FormLabel>
+            <FormItem className='gap-1.5'>
+              <FormLabel className='leading-5'>{t('Username')}</FormLabel>
               <FormControl>
-                <Input placeholder={t('Enter your username')} {...field} />
+                <Input
+                  className='h-10 px-3'
+                  placeholder={t('Enter your username')}
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -267,10 +275,11 @@ export function SignUpForm({
           control={form.control}
           name='password'
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t('Password')}</FormLabel>
+            <FormItem className='gap-1.5'>
+              <FormLabel className='leading-5'>{t('Password')}</FormLabel>
               <FormControl>
                 <PasswordInput
+                  className='[&_input]:h-10 [&_input]:px-3'
                   placeholder={t('Enter password (8-20 characters)')}
                   {...field}
                 />
@@ -285,10 +294,16 @@ export function SignUpForm({
           control={form.control}
           name='confirmPassword'
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t('Confirm password')}</FormLabel>
+            <FormItem className='gap-1.5'>
+              <FormLabel className='leading-5'>
+                {t('Confirm password')}
+              </FormLabel>
               <FormControl>
-                <PasswordInput placeholder={t('Confirm password')} {...field} />
+                <PasswordInput
+                  className='[&_input]:h-10 [&_input]:px-3'
+                  placeholder={t('Confirm password')}
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -303,12 +318,13 @@ export function SignUpForm({
               control={form.control}
               name='email'
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
+                <FormItem className='gap-1.5'>
+                  <FormLabel className='leading-5'>
                     {t('Email (required for verification)')}
                   </FormLabel>
                   <FormControl>
                     <Input
+                      className='h-10 px-3'
                       placeholder={t('name@example.com')}
                       type='email'
                       {...field}
@@ -323,6 +339,7 @@ export function SignUpForm({
             <div className='flex items-end gap-2'>
               <div className='flex-1'>
                 <Input
+                  className='h-10 px-3'
                   placeholder={t('Verification code')}
                   value={verificationCode}
                   onChange={(e) => setVerificationCode(e.target.value)}
@@ -357,22 +374,19 @@ export function SignUpForm({
           </div>
         )}
 
+        {affiliateField}
+
         <LegalConsent
           status={status}
           checked={agreedToLegal}
           onCheckedChange={setAgreedToLegal}
-          className='mt-1'
         />
 
         {/* Submit Button */}
         <Button
           type='submit'
-          className='mt-2 w-full justify-center gap-2'
-          disabled={
-            isLoading ||
-            (requiresLegalConsent && !agreedToLegal) ||
-            !turnstileReady
-          }
+          className='w-full justify-center gap-2'
+          disabled={isLoading || !turnstileReady}
         >
           {isLoading ? <Loader2 className='h-4 w-4 animate-spin' /> : null}
           {t('Create account')}
@@ -381,10 +395,16 @@ export function SignUpForm({
         {oauthRegisterEnabled && (
           <OAuthProviders
             status={status}
-            disabled={isLoading || (requiresLegalConsent && !agreedToLegal)}
+            disabled={isLoading}
+            onBeforeLogin={() => {
+              if (requiresLegalConsent && !agreedToLegal) {
+                toast.error(legalConsentErrorMessage)
+                return false
+              }
+              return true
+            }}
             onWeChatLogin={hasWeChatLogin ? handleOpenWeChatDialog : undefined}
             isWeChatLoading={isWeChatSubmitting}
-            className='pt-2'
           />
         )}
       </form>

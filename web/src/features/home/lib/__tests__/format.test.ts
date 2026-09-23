@@ -18,7 +18,7 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { describe, expect, it } from 'vitest'
 
-import { formatContextLength } from '../format'
+import { formatContextLength, padPriceDecimals } from '../format'
 
 describe('formatContextLength', () => {
   it('prints thousands with a K suffix', () => {
@@ -36,5 +36,25 @@ describe('formatContextLength', () => {
   it('shows a dash when the size is unknown', () => {
     expect(formatContextLength(undefined)).toBe('-')
     expect(formatContextLength(0)).toBe('-')
+  })
+})
+
+describe('padPriceDecimals', () => {
+  it('pads whole and one-decimal prices to two decimals', () => {
+    expect(padPriceDecimals('$10')).toBe('$10.00')
+    expect(padPriceDecimals('$0.6')).toBe('$0.60')
+  })
+
+  it('keeps the extra precision of prices that need it', () => {
+    expect(padPriceDecimals('$16.4384')).toBe('$16.4384')
+    expect(padPriceDecimals('$0.0675')).toBe('$0.0675')
+  })
+
+  it('leaves thousands separators and other currency symbols in place', () => {
+    expect(padPriceDecimals('¥1,234')).toBe('¥1,234.00')
+  })
+
+  it('returns text without a number unchanged', () => {
+    expect(padPriceDecimals('-')).toBe('-')
   })
 })

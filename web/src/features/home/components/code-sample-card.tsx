@@ -17,7 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { Check, Copy } from 'lucide-react'
-import { useState } from 'react'
+import { Fragment, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard'
@@ -27,6 +27,8 @@ import type { HeroSample } from '../lib/hero-samples'
 
 export function CodeSampleCard(props: {
   samples: HeroSample[]
+  /** Text to mark inside the code, e.g. the model name in the docs examples. */
+  highlight?: string
   className?: string
 }) {
   const { t } = useTranslation()
@@ -40,6 +42,22 @@ export function CodeSampleCard(props: {
   if (!current) return null
 
   const copied = copiedText === current.code
+
+  // Text runs of the code, with the highlighted occurrences flagged. Keyed by
+  // their offset in the code, which is unique per run.
+  const highlight = props.highlight
+  const segments: { start: number; text: string; marked: boolean }[] = []
+  if (highlight) {
+    let start = 0
+    current.code.split(highlight).forEach((text, index, parts) => {
+      segments.push({ start, text, marked: false })
+      start += text.length
+      if (index < parts.length - 1) {
+        segments.push({ start, text: highlight, marked: true })
+        start += highlight.length
+      }
+    })
+  }
 
   return (
     <div
@@ -88,7 +106,7 @@ export function CodeSampleCard(props: {
           className='text-muted-foreground hover:text-foreground flex items-center gap-1 rounded-md px-2 py-1 text-xs transition-colors'
         >
           {copied ? (
-            <Check className='size-3.5 text-emerald-600' aria-hidden='true' />
+            <Check className='text-success size-3.5' aria-hidden='true' />
           ) : (
             <Copy className='size-3.5' aria-hidden='true' />
           )}
@@ -96,7 +114,22 @@ export function CodeSampleCard(props: {
         </button>
       </div>
       <pre className='overflow-x-auto p-4 text-[13px] leading-relaxed'>
-        <code className='text-foreground font-mono'>{current.code}</code>
+        <code className='text-foreground font-mono'>
+          {highlight
+            ? segments.map((segment) =>
+                segment.marked ? (
+                  <span
+                    key={segment.start}
+                    className='bg-primary/15 text-primary rounded px-1 font-semibold'
+                  >
+                    {segment.text}
+                  </span>
+                ) : (
+                  <Fragment key={segment.start}>{segment.text}</Fragment>
+                )
+              )
+            : current.code}
+        </code>
       </pre>
     </div>
   )

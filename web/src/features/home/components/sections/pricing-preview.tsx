@@ -36,8 +36,10 @@ import {
   ZONE_DOMESTIC,
   ZONE_INTERNATIONAL,
 } from '@/features/pricing/lib/zones'
+import { getCurrencyLabel } from '@/lib/currency'
+import { cn } from '@/lib/utils'
 
-import { formatContextLength } from '../../lib/format'
+import { formatContextLength, padPriceDecimals } from '../../lib/format'
 
 /** Rows in the preview table. */
 const FEATURED_COUNT = 8
@@ -80,7 +82,9 @@ export function PricingPreview() {
 
         <Card className='mt-10 gap-0 p-0'>
           <div className='border-b px-5 py-4'>
-            <h3 className='font-semibold'>{t('Popular model pricing')}</h3>
+            <h3 className='text-base font-semibold'>
+              {t('Popular model pricing')}
+            </h3>
           </div>
           <div className='overflow-x-auto'>
             <table className='w-full text-sm'>
@@ -115,7 +119,14 @@ export function PricingPreview() {
                       <td className='px-5 py-3'>
                         {zone === ZONE_DOMESTIC ||
                         zone === ZONE_INTERNATIONAL ? (
-                          <span className='bg-secondary text-secondary-foreground rounded-md px-2 py-0.5 text-xs font-medium whitespace-nowrap'>
+                          <span
+                            className={cn(
+                              'inline-flex items-center rounded-md border border-transparent px-2 py-0.5 text-xs font-medium whitespace-nowrap',
+                              zone === ZONE_DOMESTIC
+                                ? 'bg-secondary text-secondary-foreground'
+                                : 'bg-muted text-muted-foreground'
+                            )}
+                          >
                             {zone === ZONE_DOMESTIC
                               ? t('Domestic models')
                               : t('International models')}
@@ -125,23 +136,27 @@ export function PricingPreview() {
                         )}
                       </td>
                       <td className='text-primary px-5 py-3 text-right tabular-nums'>
-                        {formatPrice(
-                          model,
-                          'input',
-                          DEFAULT_TOKEN_UNIT,
-                          false,
-                          priceRate,
-                          usdExchangeRate
+                        {padPriceDecimals(
+                          formatPrice(
+                            model,
+                            'input',
+                            DEFAULT_TOKEN_UNIT,
+                            false,
+                            priceRate,
+                            usdExchangeRate
+                          )
                         )}
                       </td>
                       <td className='text-primary px-5 py-3 text-right tabular-nums'>
-                        {formatPrice(
-                          model,
-                          'output',
-                          DEFAULT_TOKEN_UNIT,
-                          false,
-                          priceRate,
-                          usdExchangeRate
+                        {padPriceDecimals(
+                          formatPrice(
+                            model,
+                            'output',
+                            DEFAULT_TOKEN_UNIT,
+                            false,
+                            priceRate,
+                            usdExchangeRate
+                          )
                         )}
                       </td>
                       {showContext && (
@@ -156,7 +171,9 @@ export function PricingPreview() {
             </table>
           </div>
           <div className='text-muted-foreground px-5 py-3 text-xs'>
-            {t('Prices are per 1M tokens, for reference only.')}
+            {getCurrencyLabel() === 'USD'
+              ? t('Prices in USD per 1M tokens, for reference only.')
+              : t('Prices are per 1M tokens, for reference only.')}
           </div>
         </Card>
       </div>

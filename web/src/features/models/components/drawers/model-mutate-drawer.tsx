@@ -93,6 +93,7 @@ const extendedModelFormSchema = z.object({
   description: z.string(),
   icon: z.string(),
   tags: z.array(z.string()),
+  context_length: z.number().int().min(0).optional(),
   vendor_id: z.number().optional(),
   endpoints: z.string(),
   name_rule: z.number(),
@@ -365,6 +366,7 @@ export function ModelMutateDrawer({
       description: '',
       icon: '',
       tags: [],
+      context_length: undefined,
       vendor_id: undefined,
       endpoints: '',
       name_rule: 0,
@@ -433,6 +435,7 @@ export function ModelMutateDrawer({
         description: model.description || '',
         icon: model.icon || '',
         tags: parseModelTags(model.tags),
+        context_length: model.context_length || undefined,
         vendor_id: model.vendor_id,
         endpoints: model.endpoints || '',
         name_rule: model.name_rule || 0,
@@ -458,6 +461,7 @@ export function ModelMutateDrawer({
         description: '',
         icon: '',
         tags: [],
+        context_length: undefined,
         vendor_id: undefined,
         endpoints: '',
         name_rule: 0,
@@ -789,6 +793,38 @@ export function ModelMutateDrawer({
                         {...field}
                       />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name='context_length'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t('Context length')}</FormLabel>
+                    <FormControl>
+                      <Input
+                        type='number'
+                        min={0}
+                        step={1}
+                        placeholder={t('e.g. 128000')}
+                        value={field.value ?? ''}
+                        onChange={(e) =>
+                          field.onChange(
+                            e.target.value === ''
+                              ? undefined
+                              : Number(e.target.value)
+                          )
+                        }
+                      />
+                    </FormControl>
+                    <FormDescription className='text-xs'>
+                      {t(
+                        'Context window in tokens, shown on the model marketplace. Leave empty if unknown.'
+                      )}
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}

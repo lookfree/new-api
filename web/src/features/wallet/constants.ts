@@ -21,10 +21,15 @@ For commercial licensing, please contact support@quantumnous.com
 // ============================================================================
 
 /**
- * Default preset amount multipliers
- * Used to generate quick select amounts based on minimum topup
+ * Preset top-up amounts offered when the operator has configured none: the
+ * four the prototype shows.
  */
-export const DEFAULT_PRESET_MULTIPLIERS = [1, 5, 10, 30, 50, 100, 300, 500]
+export const DEFAULT_PRESET_AMOUNTS = [10, 50, 100, 200]
+
+/**
+ * The preset picked when the page opens, if it is on offer.
+ */
+export const DEFAULT_SELECTED_AMOUNT = 50
 
 /**
  * Payment method types
@@ -36,6 +41,7 @@ export const PAYMENT_TYPES = {
   CREEM: 'creem',
   WAFFO: 'waffo',
   WAFFO_PANCAKE: 'waffo_pancake',
+  AIRWALLEX: 'airwallex',
 } as const
 
 /**
@@ -53,6 +59,7 @@ export const PAYMENT_ICON_COLORS = {
   [PAYMENT_TYPES.CREEM]: '#6366F1',
   [PAYMENT_TYPES.WAFFO]: '#2563EB',
   [PAYMENT_TYPES.WAFFO_PANCAKE]: '#F97316',
+  [PAYMENT_TYPES.AIRWALLEX]: '#612FFF',
 } as const
 
 /**
@@ -64,3 +71,9 @@ export const DEFAULT_DISCOUNT_RATE = 1.0
  * Default minimum topup amount
  */
 export const DEFAULT_MIN_TOPUP = 1
+
+/**
+ * Query key prefix of the wallet's transactions list, so a completed payment
+ * can refresh it together with the balance.
+ */
+export const WALLET_TRANSACTIONS_QUERY_KEY = ['wallet', 'transactions'] as const

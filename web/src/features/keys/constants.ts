@@ -16,7 +16,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { type StatusBadgeProps } from '@/components/status-badge'
+import type { StatusBadgeProps } from '@/components/status-badge'
 
 // ============================================================================
 // API Key Status Configuration
@@ -59,12 +59,34 @@ export const API_KEY_STATUSES: Record<
   },
 } as const
 
+// Badge variants of the shared `Badge`, used by the keys table.
+export const API_KEY_STATUS_BADGE_VARIANTS: Record<
+  number,
+  'success' | 'muted' | 'warning' | 'destructive'
+> = {
+  [API_KEY_STATUS.ENABLED]: 'success',
+  [API_KEY_STATUS.DISABLED]: 'muted',
+  [API_KEY_STATUS.EXPIRED]: 'warning',
+  [API_KEY_STATUS.EXHAUSTED]: 'destructive',
+}
+
 export const API_KEY_STATUS_OPTIONS = Object.values(API_KEY_STATUSES).map(
   (config) => ({
     label: config.label,
     value: String(config.value),
   })
 )
+
+// ============================================================================
+// Table
+// ============================================================================
+
+export const API_KEYS_PAGE_SIZE = 20
+
+// Up to this many keys the page is the plain prototype table. Beyond it (or
+// while a filter is active) the filter row and row selection appear, since
+// finding and clearing out keys only becomes a chore with many of them.
+export const API_KEYS_MANAGE_THRESHOLD = 8
 
 // ============================================================================
 // Default Values

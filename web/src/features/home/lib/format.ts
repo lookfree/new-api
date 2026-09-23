@@ -23,8 +23,22 @@ const CONTEXT_FORMAT = new Intl.NumberFormat('en-US', {
 /** Context window as the prototype prints it: 128K, 2M. Unknown sizes show "-". */
 export function formatContextLength(tokens?: number): string {
   if (!tokens || !Number.isFinite(tokens) || tokens <= 0) return '-'
-  if (tokens >= 1_000_000)
+  if (tokens >= 1_000_000) {
     return `${CONTEXT_FORMAT.format(tokens / 1_000_000)}M`
+  }
   if (tokens >= 1_000) return `${CONTEXT_FORMAT.format(tokens / 1_000)}K`
   return CONTEXT_FORMAT.format(tokens)
+}
+
+/**
+ * Pads a formatted price to at least two decimals ("$0.6" becomes "$0.60"),
+ * which is how the prototype's pricing table prints them, while keeping any
+ * extra precision the price needs ("$16.4384" stays as is). Text without a
+ * number, such as the "-" placeholder, is returned untouched.
+ */
+export function padPriceDecimals(formatted: string, minDecimals = 2): string {
+  const match = formatted.match(/^([^\d-]*)(-?\d[\d,]*)(?:\.(\d+))?(.*)$/)
+  if (!match) return formatted
+  const [, prefix, whole, fraction = '', suffix] = match
+  return `${prefix}${whole}.${fraction.padEnd(minDecimals, '0')}${suffix}`
 }

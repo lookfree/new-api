@@ -50,4 +50,18 @@ describe('CodeSampleCard', () => {
     expect(screen.getByText('curl https://example.com')).toBeInTheDocument()
     expect(screen.queryByText('print("python")')).not.toBeInTheDocument()
   })
+
+  it('marks every occurrence of the highlight text and keeps the rest of the code', () => {
+    render(
+      <CodeSampleCard
+        samples={[{ label: 'cURL', code: 'model=zt/max and again zt/max' }]}
+        highlight='zt/max'
+      />
+    )
+
+    const marked = screen.getAllByText('zt/max')
+    expect(marked).toHaveLength(2)
+    expect(marked[0].tagName).toBe('SPAN')
+    expect(screen.getByText(/model=/)).toBeInTheDocument()
+  })
 })

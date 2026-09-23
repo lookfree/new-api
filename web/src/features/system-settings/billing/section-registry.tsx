@@ -154,6 +154,12 @@ const BILLING_SECTIONS = [
           CreemTestMode: settings.CreemTestMode,
           CreemProducts: settings.CreemProducts,
         }}
+        airwallexDefaultValues={{
+          AirwallexEnabled: settings.AirwallexEnabled ?? false,
+          AirwallexClientId: settings.AirwallexClientId ?? '',
+          AirwallexApiKey: settings.AirwallexApiKey ?? '',
+          AirwallexWebhookSecret: settings.AirwallexWebhookSecret ?? '',
+        }}
         waffoDefaultValues={{
           WaffoEnabled: settings.WaffoEnabled ?? false,
           WaffoApiKey: settings.WaffoApiKey ?? '',

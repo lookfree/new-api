@@ -52,10 +52,10 @@ export function Hero(props: HeroProps) {
   )
 
   return (
-    <section className='relative overflow-hidden border-b pt-14'>
+    <section className='relative overflow-hidden border-b pt-[57px]'>
       <div className='mx-auto grid max-w-6xl items-center gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:py-24'>
         <div>
-          <span className='bg-primary/10 text-primary mb-5 inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium'>
+          <span className='bg-primary/10 text-primary mb-5 inline-flex items-center gap-1 rounded-md border border-transparent px-2 py-0.5 text-xs font-medium'>
             <Sparkles className='size-3' aria-hidden='true' />
             {t('LLM aggregation gateway')}
           </span>

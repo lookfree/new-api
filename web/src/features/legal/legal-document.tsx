@@ -17,7 +17,8 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { useQuery } from '@tanstack/react-query'
-import { FileWarning } from 'lucide-react'
+import { Link } from '@tanstack/react-router'
+import { ArrowLeft, FileWarning } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 import { PublicLayout } from '@/components/layout'
@@ -57,7 +58,7 @@ export function LegalDocument({
 
   if (isLoading) {
     return (
-      <PublicLayout>
+      <PublicLayout showFooter>
         <div className='mx-auto flex max-w-4xl flex-col gap-4 py-12'>
           <Skeleton className='h-8 w-[45%]' />
           <Skeleton className='h-4 w-full' />
@@ -70,7 +71,7 @@ export function LegalDocument({
 
   if (!success || !hasContent) {
     return (
-      <PublicLayout>
+      <PublicLayout showFooter>
         <div className='mx-auto max-w-2xl py-12'>
           <Card className='border-dashed'>
             <CardHeader className='flex flex-row items-center gap-4'>
@@ -92,7 +93,7 @@ export function LegalDocument({
 
   if (isUrl) {
     return (
-      <PublicLayout>
+      <PublicLayout showFooter>
         <div className='mx-auto max-w-2xl py-12'>
           <Card>
             <CardHeader>
@@ -122,23 +123,34 @@ export function LegalDocument({
     )
   }
 
-  return (
-    <PublicLayout showMainContainer={!contentIsHtml}>
-      {contentIsHtml ? (
+  if (contentIsHtml) {
+    return (
+      <PublicLayout showMainContainer={false} showFooter>
         <RichContent mode='html' htmlVariant='isolated' content={rawContent} />
-      ) : (
-        <div className='mx-auto max-w-4xl space-y-6 py-12'>
-          <div className='space-y-2'>
-            <h1 className='text-3xl font-semibold tracking-tight'>{title}</h1>
-          </div>
+      </PublicLayout>
+    )
+  }
 
-          <RichContent
-            mode='markdown'
-            content={rawContent}
-            className='prose-neutral dark:prose-invert max-w-none'
-          />
-        </div>
-      )}
+  return (
+    <PublicLayout showMainContainer={false} showFooter>
+      <div className='mx-auto w-full max-w-3xl px-4 pt-[calc(57px+3rem)] pb-12 md:pt-[calc(57px+4rem)] md:pb-16'>
+        <Link
+          to='/'
+          className='text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm transition-colors'
+        >
+          <ArrowLeft className='size-4' aria-hidden='true' />
+          {t('Back to home')}
+        </Link>
+        <h1 className='mt-6 text-3xl font-semibold tracking-tight text-balance md:text-4xl'>
+          {title}
+        </h1>
+
+        <RichContent
+          mode='markdown'
+          content={rawContent}
+          className='prose-neutral dark:prose-invert text-muted-foreground mt-8 max-w-none leading-relaxed'
+        />
+      </div>
     </PublicLayout>
   )
 }

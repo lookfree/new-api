@@ -35,8 +35,9 @@ type SystemBrandProps = {
    * Visual layout:
    * - 'sidebar': stacked card style (used inside the sidebar header).
    * - 'inline': compact horizontal pill (used inside the top app bar).
+   * - 'console': logo + name row heading the console sidebar; links to home.
    */
-  variant?: 'sidebar' | 'inline'
+  variant?: 'sidebar' | 'inline' | 'console'
 }
 
 /**
@@ -54,6 +55,25 @@ export function SystemBrand(props: SystemBrandProps) {
   const name = status?.system_name || props.defaultName || 'New API'
   const version =
     status?.version || props.defaultVersion || t('Unknown version')
+
+  if (variant === 'console') {
+    return (
+      <Link
+        to='/'
+        aria-label={t('Go to home')}
+        className='focus-visible:ring-ring/40 flex items-center gap-2 rounded-md outline-none focus-visible:ring-2'
+      >
+        <img
+          src={logo}
+          alt={t('Logo')}
+          className='size-7 shrink-0 rounded-md object-cover'
+        />
+        <span className='truncate text-base leading-none font-semibold tracking-tight group-data-[collapsible=icon]:hidden'>
+          {name}
+        </span>
+      </Link>
+    )
+  }
 
   if (variant === 'inline') {
     return (

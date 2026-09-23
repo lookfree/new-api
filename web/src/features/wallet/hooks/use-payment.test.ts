@@ -46,4 +46,29 @@ describe('payment amount routing', () => {
     expect(amount).toBe(18.75)
     expect(calls).toEqual(['waffo:120'])
   })
+
+  test('prices Airwallex with the regular calculator the server also uses for its order', async () => {
+    const calls: string[] = []
+    const amount = await requestPaymentAmount(50, PAYMENT_TYPES.AIRWALLEX, {
+      regular: async (request) => {
+        calls.push(`regular:${request.amount}`)
+        return { success: true, data: '365.00' }
+      },
+      stripe: async () => {
+        calls.push('stripe')
+        return { success: true, data: '2' }
+      },
+      waffo: async () => {
+        calls.push('waffo')
+        return { success: true, data: '3' }
+      },
+      waffoPancake: async () => {
+        calls.push('pancake')
+        return { success: true, data: '4' }
+      },
+    })
+
+    expect(amount).toBe(365)
+    expect(calls).toEqual(['regular:50'])
+  })
 })

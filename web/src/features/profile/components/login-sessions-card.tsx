@@ -26,14 +26,6 @@ import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
 import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
-import {
   Empty,
   EmptyDescription,
   EmptyHeader,
@@ -52,6 +44,7 @@ import {
 } from '../api'
 import { LoginSessionDialogs } from './login-session-dialogs'
 import { LoginSessionItem } from './login-session-item'
+import { ProfileCard } from './profile-card'
 
 const sessionQueryKey = ['profile', 'login-sessions'] as const
 
@@ -171,31 +164,30 @@ export function LoginSessionsCard() {
 
   return (
     <>
-      <Card data-card-hover='false'>
-        <CardHeader>
-          <CardTitle>{t('Login sessions')}</CardTitle>
-          <CardDescription>
-            {t('Review and sign out devices currently using your account.')}
-          </CardDescription>
-          <CardAction>
-            <Button
-              type='button'
-              variant='outline'
-              size='sm'
-              disabled={!hasOtherSessions || revokeOthersMutation.isPending}
-              onClick={() => setConfirmOthers(true)}
-            >
-              <HugeiconsIcon
-                icon={Logout01Icon}
-                data-icon='inline-start'
-                strokeWidth={2}
-              />
-              {t('Sign out other sessions')}
-            </Button>
-          </CardAction>
-        </CardHeader>
-        <CardContent>{sessionsContent}</CardContent>
-      </Card>
+      <ProfileCard
+        title={t('Login sessions')}
+        description={t(
+          'Review and sign out devices currently using your account.'
+        )}
+        action={
+          <Button
+            type='button'
+            variant='outline'
+            size='sm'
+            disabled={!hasOtherSessions || revokeOthersMutation.isPending}
+            onClick={() => setConfirmOthers(true)}
+          >
+            <HugeiconsIcon
+              icon={Logout01Icon}
+              data-icon='inline-start'
+              strokeWidth={2}
+            />
+            {t('Sign out other sessions')}
+          </Button>
+        }
+      >
+        {sessionsContent}
+      </ProfileCard>
 
       <LoginSessionDialogs
         revokeTarget={revokeTarget}

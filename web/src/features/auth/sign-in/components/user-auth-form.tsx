@@ -232,8 +232,8 @@ export function UserAuthForm(props: UserAuthFormProps) {
           control={form.control}
           name='username'
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t('Email')}</FormLabel>
+            <FormItem className='gap-1.5'>
+              <FormLabel className='leading-5'>{t('Email')}</FormLabel>
               <FormControl>
                 <Input
                   className='h-10 px-3'
@@ -251,8 +251,8 @@ export function UserAuthForm(props: UserAuthFormProps) {
           control={form.control}
           name='password'
           render={({ field }) => (
-            <FormItem className='relative'>
-              <FormLabel>{t('Password')}</FormLabel>
+            <FormItem className='relative gap-1.5'>
+              <FormLabel className='leading-5'>{t('Password')}</FormLabel>
               <FormControl>
                 <PasswordInput
                   className='[&_input]:h-10 [&_input]:px-3'

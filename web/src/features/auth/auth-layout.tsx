@@ -19,8 +19,10 @@ For commercial licensing, please contact support@quantumnous.com
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 
-import { LanguageSwitcher } from '@/components/language-switcher'
-import { ThemeSwitch } from '@/components/theme-switch'
+import {
+  PublicLanguageToggle,
+  ThemeToggle,
+} from '@/components/layout/components/public-toggles'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useSystemConfig } from '@/hooks/use-system-config'
 
@@ -33,7 +35,7 @@ export function AuthLayout({ children }: AuthLayoutProps) {
   const { systemName, logo, loading } = useSystemConfig()
 
   return (
-    <div className='bg-background flex min-h-dvh flex-col'>
+    <div className='bg-background flex min-h-dvh flex-col antialiased'>
       <header className='flex h-14 items-center justify-between px-4 sm:px-6'>
         <Link
           to='/'
@@ -57,8 +59,8 @@ export function AuthLayout({ children }: AuthLayoutProps) {
           )}
         </Link>
         <div className='flex items-center gap-1'>
-          <LanguageSwitcher />
-          <ThemeSwitch />
+          <PublicLanguageToggle />
+          <ThemeToggle />
         </div>
       </header>
 

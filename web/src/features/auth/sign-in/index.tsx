@@ -20,7 +20,6 @@ import { Link, useSearch } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { Checkbox } from '@/components/ui/checkbox'
 import { useStatus } from '@/hooks/use-status'
 import { useSystemConfig } from '@/hooks/use-system-config'
 import { cn } from '@/lib/utils'
@@ -70,14 +69,15 @@ export function SignIn() {
   const agreement = (
     <div className='space-y-1.5'>
       <label className='text-muted-foreground flex items-start gap-2 text-xs leading-relaxed'>
-        <Checkbox
+        <input
+          type='checkbox'
           checked={agreed}
-          onCheckedChange={(value) => {
-            setAgreed(value === true)
-            if (value === true) setAgreementError(false)
+          onChange={(event) => {
+            setAgreed(event.target.checked)
+            if (event.target.checked) setAgreementError(false)
           }}
           aria-invalid={agreementError}
-          className='mt-0.5'
+          className='accent-primary mt-0.5 size-4 shrink-0'
         />
         <span>
           {t('I have read and agree to the')}{' '}

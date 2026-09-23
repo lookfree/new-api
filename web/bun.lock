@@ -5,6 +5,7 @@
     "": {
       "name": "newapi-web",
       "dependencies": {
+        "@airwallex/components-sdk": "^1.35.2",
         "@base-ui/react": "^1.6.0",
         "@codemirror/lang-javascript": "^6.2.5",
         "@codemirror/lang-markdown": "^6.5.0",
@@ -115,6 +116,10 @@
     "@ai-sdk/provider": ["@ai-sdk/provider@4.0.3", "", { "dependencies": { "json-schema": "^0.4.0" } }, "sha512-e0CpNWJUY7OxAFAnCZkw+ri9QOHWwTs1tXP42782KFGCU07qt8NiXCrCVowyCB5dP2r5/Uls+g2oPd8kOJn9dw=="],
 
     "@ai-sdk/provider-utils": ["@ai-sdk/provider-utils@5.0.11", "", { "dependencies": { "@ai-sdk/provider": "4.0.3", "@standard-schema/spec": "^1.1.0", "@workflow/serde": "4.1.0", "eventsource-parser": "^3.0.8" }, "peerDependencies": { "zod": "^3.25.76 || ^4.1.8" } }, "sha512-7/96wE+ZsKB35iS9ASyllrE4Ym/EolXEB7AkuJ5FI++fmS85BVTAs77890C+1Z2jwHfBKjBQSBmsliOsAh0iFQ=="],
+
+    "@airwallex/airtracker": ["@airwallex/airtracker@3.2.0", "", {}, "sha512-PKE5N38ajTVg6ph9JzLpWsICNjqLtf/wWudNVU3UPX9SVy2I5s5ITc281sMSD8+LIE6RJoGjGTO+VYP/io5kig=="],
+
+    "@airwallex/components-sdk": ["@airwallex/components-sdk@1.35.2", "", { "dependencies": { "@airwallex/airtracker": "^3.0.0" } }, "sha512-Em7G+zkYkWSawZQVsHYHcfG4L9YXu2cvSkQvlzNrssOR+FMpMDmDta5D2ZSpmXCN68RgprlIlGuIYkrfHMo0rg=="],
 
     "@alloc/quick-lru": ["@alloc/quick-lru@5.2.0", "", {}, "sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw=="],
 

@@ -94,6 +94,8 @@ export type NotifyType = 'email' | 'webhook' | 'bark' | 'gotify'
 export interface UserSettings {
   /** Notification type */
   notify_type?: NotifyType
+  /** Balance alerts and other notices are switched off; channel settings are kept */
+  notify_disabled?: boolean
   /** Quota warning threshold */
   quota_warning_threshold?: number
   /** Webhook URL */
@@ -134,6 +136,8 @@ export interface UpdateUserRequest {
  */
 export interface UpdateUserSettingsRequest {
   notify_type?: string
+  /** Omit to keep the stored value. */
+  notify_disabled?: boolean
   quota_warning_threshold?: number
   webhook_url?: string
   webhook_secret?: string

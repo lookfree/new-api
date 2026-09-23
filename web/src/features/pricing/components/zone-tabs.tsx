@@ -33,7 +33,6 @@ import {
   ZONE_DOMESTIC,
   ZONE_INTERNATIONAL,
   ZONE_OTHER,
-  type ModelZone,
   type ZoneFilter,
 } from '../lib/zones'
 
@@ -47,8 +46,6 @@ const ZONE_LABEL_KEYS: Record<ZoneFilter, string> = {
 export function ZoneTabs(props: {
   zones: readonly ZoneFilter[]
   value: ZoneFilter
-  counts: Record<ModelZone, number>
-  total: number
   onChange: (zone: ZoneFilter) => void
   className?: string
 }) {
@@ -63,13 +60,12 @@ export function ZoneTabs(props: {
       role='group'
       aria-label={t('Model zone')}
       className={cn(
-        'bg-muted/60 inline-flex items-center rounded-lg border p-0.5',
+        'bg-card inline-flex w-fit items-center rounded-lg border p-1',
         props.className
       )}
     >
       {props.zones.map((zone) => {
         const isActive = zone === props.value
-        const count = zone === ZONE_ALL ? props.total : props.counts[zone]
         return (
           <button
             key={zone}
@@ -77,21 +73,13 @@ export function ZoneTabs(props: {
             onClick={() => props.onChange(zone)}
             aria-pressed={isActive}
             className={cn(
-              'inline-flex h-8 items-center gap-1.5 rounded-md px-3 text-xs font-medium transition-all',
+              'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
               isActive
-                ? 'bg-primary text-primary-foreground shadow-sm'
+                ? 'bg-primary text-primary-foreground'
                 : 'text-muted-foreground hover:text-foreground'
             )}
           >
-            <span>{t(ZONE_LABEL_KEYS[zone])}</span>
-            <span
-              className={cn(
-                'tabular-nums',
-                isActive ? 'text-primary-foreground/70' : 'opacity-60'
-              )}
-            >
-              {count}
-            </span>
+            {t(ZONE_LABEL_KEYS[zone])}
           </button>
         )
       })}

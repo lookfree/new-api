@@ -21,8 +21,9 @@ For commercial licensing, please contact support@quantumnous.com
  *
  * The nav item for this page already existed but pointed at a route that was
  * never built, so `/docs` returned the 404 page whenever no external docs URL
- * was configured. Content mirrors the Zetone prototype: quick start, auth,
- * call examples, model list, billing and error codes.
+ * was configured. Layout and copy mirror the Zetone prototype: quick start,
+ * auth, call examples, model list, billing and error codes, with the live base
+ * URL and a model from the live catalog filled into the copy and the samples.
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -30,32 +31,30 @@ import { useTranslation } from 'react-i18next'
 
 import { PublicLayout } from '@/components/layout'
 import { PageTransition } from '@/components/page-transition'
+import { CodeSampleCard } from '@/features/home/components/code-sample-card'
+import { usePricingData } from '@/features/pricing/hooks/use-pricing-data'
 import { useStatus } from '@/hooks/use-status'
+import { useSystemConfig } from '@/hooks/use-system-config'
 import { cn } from '@/lib/utils'
 
-import { SampleTabs } from './components/sample-tabs'
 import {
   isScrolledToBottom,
   pickActiveSection,
   type SectionOffset,
 } from './lib/active-section'
 import { resolveApiBaseUrl } from './lib/base-url'
-import {
-  buildCallSamples,
-  buildModelListSample,
-  FALLBACK_SAMPLE_MODEL,
-} from './lib/samples'
+import { buildCallSamples, FALLBACK_SAMPLE_MODEL } from './lib/samples'
 
-const SECTIONS = [
-  { id: 'quickstart', title: 'Quick start' },
-  { id: 'auth', title: 'Authentication' },
-  { id: 'examples', title: 'Call examples' },
-  { id: 'models', title: 'Model list' },
-  { id: 'billing', title: 'Billing' },
-  { id: 'errors', title: 'Error codes' },
+const SECTION_IDS = [
+  'quickstart',
+  'auth',
+  'examples',
+  'models',
+  'billing',
+  'errors',
 ] as const
 
-type SectionId = (typeof SECTIONS)[number]['id']
+type SectionId = (typeof SECTION_IDS)[number]
 
 /**
  * Distance below the viewport top at which a heading counts as "reached".
@@ -74,17 +73,16 @@ const ERROR_CODES: { code: string; meaning: string }[] = [
 export function Docs() {
   const { t } = useTranslation()
   const { status } = useStatus()
+  const { systemName } = useSystemConfig()
+  const { models } = usePricingData()
   const [activeSection, setActiveSection] = useState<SectionId>('quickstart')
   const sectionRefs = useRef<Partial<Record<SectionId, HTMLElement | null>>>({})
 
   const baseUrl = useMemo(() => resolveApiBaseUrl(status), [status])
+  const sampleModel = models?.[0]?.model_name || FALLBACK_SAMPLE_MODEL
   const callSamples = useMemo(
-    () => buildCallSamples(baseUrl, FALLBACK_SAMPLE_MODEL),
-    [baseUrl]
-  )
-  const modelListSample = useMemo(
-    () => buildModelListSample(baseUrl),
-    [baseUrl]
+    () => buildCallSamples(baseUrl, sampleModel),
+    [baseUrl, sampleModel]
   )
 
   // Highlight the section the reader is currently in. Measured on scroll rather
@@ -97,13 +95,10 @@ export function Docs() {
     const measure = () => {
       frame = 0
       const offsets: SectionOffset<SectionId>[] = []
-      for (const section of SECTIONS) {
-        const element = sectionRefs.current[section.id]
+      for (const id of SECTION_IDS) {
+        const element = sectionRefs.current[id]
         if (element) {
-          offsets.push({
-            id: section.id,
-            top: element.getBoundingClientRect().top,
-          })
+          offsets.push({ id, top: element.getBoundingClientRect().top })
         }
       }
       const next = pickActiveSection(offsets, {
@@ -140,183 +135,128 @@ export function Docs() {
     })
   }
 
+  const titles: Record<SectionId, string> = {
+    quickstart: t('Quick start'),
+    auth: t('Authentication', { context: 'docs' }),
+    examples: t('Call examples'),
+    models: t('Model list'),
+    billing: t('Billing'),
+    errors: t('Error codes'),
+  }
+
+  const bodies: Record<SectionId, string> = {
+    quickstart: t(
+      '{{name}} exposes an OpenAI-compatible API. Point base_url to {{url}} and use your key to call any model.',
+      { name: systemName, url: `${baseUrl}/v1` }
+    ),
+    auth: t(
+      'All requests must include your key as a Bearer token in the Authorization header. Create and manage keys in the console.'
+    ),
+    examples: t(
+      'The examples below show a chat completion request in cURL, Python and Node.js. Switch models by changing the model field.'
+    ),
+    models: t(
+      'Browse the marketplace or call /v1/models to list available models. Use the model ID in the model field.'
+    ),
+    billing: t(
+      'Billed per input and output token in real time. One balance covers all models; view usage and top up in the console.'
+    ),
+    errors: t(
+      'The API follows standard HTTP status codes; error responses include error.code and error.message fields.'
+    ),
+  }
+
   return (
-    <PublicLayout showMainContainer={false}>
-      <PageTransition className='mx-auto w-full max-w-6xl px-4 pt-16 pb-16 sm:px-6 sm:pt-20'>
-        <header className='mb-10'>
-          <h1 className='text-[clamp(1.875rem,4vw,2.5rem)] leading-tight font-bold tracking-tight'>
+    <PublicLayout showMainContainer={false} showFooter>
+      <PageTransition className='mx-auto w-full max-w-6xl px-4 pt-[calc(57px+2.5rem)] pb-10 md:pt-[calc(57px+3.5rem)] md:pb-14'>
+        <header className='mb-8'>
+          <h1 className='text-3xl font-semibold tracking-tight text-balance md:text-4xl'>
             {t('Documentation')}
           </h1>
-          <p className='text-muted-foreground/80 mt-3 max-w-2xl leading-relaxed'>
-            {t(
-              'Call every model through one OpenAI-compatible endpoint. Point your client at the base URL below and switch models by changing a single field.'
-            )}
-          </p>
         </header>
 
-        <div className='grid gap-10 md:grid-cols-[190px_minmax(0,1fr)]'>
-          <aside className='md:sticky md:top-20 md:h-fit'>
+        <div className='grid gap-8 md:grid-cols-[200px_1fr]'>
+          <aside className='md:sticky md:top-24 md:h-fit'>
             <p className='text-muted-foreground mb-3 text-xs font-semibold tracking-wide uppercase'>
               {t('On this page')}
             </p>
             <nav className='flex flex-col gap-1'>
-              {SECTIONS.map((section) => (
+              {SECTION_IDS.map((id) => (
                 <button
-                  key={section.id}
+                  key={id}
                   type='button'
-                  onClick={() => scrollToSection(section.id)}
-                  aria-current={
-                    activeSection === section.id ? 'true' : undefined
-                  }
+                  onClick={() => scrollToSection(id)}
+                  aria-current={activeSection === id ? 'true' : undefined}
                   className={cn(
                     'rounded-md px-3 py-1.5 text-left text-sm transition-colors',
-                    activeSection === section.id
+                    activeSection === id
                       ? 'bg-primary/10 text-primary font-medium'
                       : 'text-muted-foreground hover:bg-accent hover:text-foreground'
                   )}
                 >
-                  {t(section.title)}
+                  {titles[id]}
                 </button>
               ))}
             </nav>
           </aside>
 
-          <article className='min-w-0 space-y-14'>
-            <DocsSection
-              id='quickstart'
-              title={t('Quick start')}
-              refs={sectionRefs}
-            >
-              <p>
-                {t(
-                  'This gateway exposes an OpenAI-compatible API. Point base_url at the address below and use your key to call any model.'
+          <article className='min-w-0 space-y-12'>
+            {SECTION_IDS.map((id) => (
+              <section
+                key={id}
+                id={id}
+                ref={(element) => {
+                  sectionRefs.current[id] = element
+                }}
+                className='scroll-mt-24'
+              >
+                <h2 className='text-2xl font-semibold tracking-tight text-pretty'>
+                  {titles[id]}
+                </h2>
+                <p className='text-muted-foreground mt-3 leading-relaxed'>
+                  {bodies[id]}
+                </p>
+                {id === 'examples' && (
+                  <div className='mt-5'>
+                    <CodeSampleCard
+                      samples={callSamples}
+                      highlight={sampleModel}
+                    />
+                  </div>
                 )}
-              </p>
-              <dl className='divide-border bg-muted/40 mt-4 divide-y rounded-lg border text-sm'>
-                <div className='flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-3'>
-                  <dt className='text-muted-foreground w-24 shrink-0'>
-                    {t('Base URL')}
-                  </dt>
-                  <dd className='font-mono break-all'>{baseUrl}/v1</dd>
-                </div>
-                <div className='flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-3'>
-                  <dt className='text-muted-foreground w-24 shrink-0'>
-                    {t('Protocol')}
-                  </dt>
-                  <dd>{t('OpenAI compatible')}</dd>
-                </div>
-              </dl>
-            </DocsSection>
-
-            <DocsSection
-              id='auth'
-              title={t('Authentication')}
-              refs={sectionRefs}
-            >
-              <p>
-                {t(
-                  'Every request carries your key as a Bearer token in the Authorization header. Create and revoke keys in the console.'
+                {id === 'errors' && (
+                  <div className='mt-5 overflow-hidden rounded-lg border'>
+                    <table className='w-full text-sm'>
+                      <thead className='bg-muted/50 text-left'>
+                        <tr>
+                          <th className='px-4 py-2 font-medium'>
+                            {t('Status code')}
+                          </th>
+                          <th className='px-4 py-2 font-medium'>
+                            {t('Meaning')}
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {ERROR_CODES.map((row) => (
+                          <tr key={row.code} className='border-t'>
+                            <td className='text-primary px-4 py-2 font-mono'>
+                              {row.code}
+                            </td>
+                            <td className='text-muted-foreground px-4 py-2'>
+                              {t(row.meaning)}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 )}
-              </p>
-              <div className='bg-muted/40 mt-4 rounded-lg border px-4 py-3'>
-                <code className='text-foreground font-mono text-sm break-all'>
-                  Authorization: Bearer &lt;your-api-key&gt;
-                </code>
-              </div>
-            </DocsSection>
-
-            <DocsSection
-              id='examples'
-              title={t('Call examples')}
-              refs={sectionRefs}
-            >
-              <p>
-                {t(
-                  'The examples below send one chat completion request. Switch models by changing the model field; nothing else changes.'
-                )}
-              </p>
-              <div className='mt-4'>
-                <SampleTabs samples={callSamples} />
-              </div>
-            </DocsSection>
-
-            <DocsSection id='models' title={t('Model list')} refs={sectionRefs}>
-              <p>
-                {t(
-                  'Browse the model square for pricing and capabilities, or fetch the list programmatically.'
-                )}
-              </p>
-              <div className='mt-4'>
-                <SampleTabs samples={modelListSample} />
-              </div>
-            </DocsSection>
-
-            <DocsSection id='billing' title={t('Billing')} refs={sectionRefs}>
-              <p>
-                {t(
-                  'Requests are billed per input and output token in real time. One balance covers every model; usage and spend are itemized in the console.'
-                )}
-              </p>
-            </DocsSection>
-
-            <DocsSection
-              id='errors'
-              title={t('Error codes')}
-              refs={sectionRefs}
-            >
-              <p>
-                {t(
-                  'The API follows standard HTTP status codes. Error responses carry an error.code and an error.message field.'
-                )}
-              </p>
-              <div className='mt-4 overflow-x-auto rounded-lg border'>
-                <table className='w-full text-sm'>
-                  <thead className='bg-muted/50 text-left'>
-                    <tr>
-                      <th className='px-4 py-2 font-medium'>{t('Status')}</th>
-                      <th className='px-4 py-2 font-medium'>{t('Meaning')}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {ERROR_CODES.map((row) => (
-                      <tr key={row.code} className='border-t'>
-                        <td className='text-primary px-4 py-2 font-mono tabular-nums'>
-                          {row.code}
-                        </td>
-                        <td className='text-muted-foreground px-4 py-2'>
-                          {t(row.meaning)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </DocsSection>
+              </section>
+            ))}
           </article>
         </div>
       </PageTransition>
     </PublicLayout>
-  )
-}
-
-function DocsSection(props: {
-  id: SectionId
-  title: string
-  refs: React.RefObject<Partial<Record<SectionId, HTMLElement | null>>>
-  children: React.ReactNode
-}) {
-  return (
-    <section
-      id={props.id}
-      ref={(element) => {
-        props.refs.current[props.id] = element
-      }}
-      className='scroll-mt-24'
-    >
-      <h2 className='text-2xl font-semibold tracking-tight'>{props.title}</h2>
-      <div className='text-muted-foreground mt-3 leading-relaxed'>
-        {props.children}
-      </div>
-    </section>
   )
 }

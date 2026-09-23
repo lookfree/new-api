@@ -60,14 +60,14 @@ export function AffRecordsTable(props: {
     <div className='overflow-x-auto'>
       <table className='w-full text-sm'>
         <thead>
-          <tr className='bg-muted/40 text-muted-foreground border-b text-left text-xs'>
-            <th className='px-5 py-3 font-medium'>{t('Invitee')}</th>
-            <th className='px-5 py-3 font-medium'>{t('Signed up')}</th>
-            <th className='px-5 py-3 font-medium'>{t('Has topped up')}</th>
-            <th className='px-5 py-3 text-right font-medium'>
+          <tr className='text-muted-foreground border-b text-left text-xs'>
+            <th className='px-4 py-2.5 font-medium'>{t('Invitee')}</th>
+            <th className='px-4 py-2.5 font-medium'>{t('Signed up')}</th>
+            <th className='px-4 py-2.5 font-medium'>{t('Has topped up')}</th>
+            <th className='px-4 py-2.5 text-right font-medium'>
               {t('Their top-up')}
             </th>
-            <th className='px-5 py-3 text-right font-medium'>
+            <th className='px-4 py-2.5 text-right font-medium'>
               {t('My reward')}
             </th>
           </tr>
@@ -75,21 +75,23 @@ export function AffRecordsTable(props: {
         <tbody>
           {props.records.map((record) => (
             <tr key={record.invitee_id} className='border-b last:border-0'>
-              <td className='px-5 py-3 font-mono'>{record.display}</td>
-              <td className='text-muted-foreground px-5 py-3 tabular-nums'>
+              <td className='px-4 py-2.5 font-mono text-xs'>
+                {record.display}
+              </td>
+              <td className='text-muted-foreground px-4 py-2.5'>
                 {record.registered_at
                   ? dayjs.unix(record.registered_at).format('YYYY-MM-DD')
                   : '—'}
               </td>
-              <td className='px-5 py-3'>
-                <Badge variant={record.topped_up ? 'default' : 'ghost'}>
-                  {record.topped_up ? t('Yes') : t('Not yet')}
+              <td className='px-4 py-2.5'>
+                <Badge variant={record.topped_up ? 'success' : 'muted'}>
+                  {record.topped_up ? t('Topped up') : t('Not yet')}
                 </Badge>
               </td>
-              <td className='px-5 py-3 text-right tabular-nums'>
-                {record.topped_up ? record.topup_money.toFixed(2) : '—'}
+              <td className='px-4 py-2.5 text-right tabular-nums'>
+                {record.topped_up ? `¥${record.topup_money.toFixed(2)}` : '—'}
               </td>
-              <td className='text-primary px-5 py-3 text-right font-medium tabular-nums'>
+              <td className='text-primary px-4 py-2.5 text-right font-medium tabular-nums'>
                 {record.reward_quota > 0
                   ? formatQuota(record.reward_quota)
                   : '—'}

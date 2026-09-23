@@ -73,7 +73,9 @@ export function Features() {
                 <span className='bg-primary/10 text-primary flex size-10 items-center justify-center rounded-lg'>
                   <Icon className='size-5' aria-hidden='true' />
                 </span>
-                <h3 className='mt-4 font-semibold'>{t(item.titleKey)}</h3>
+                <h3 className='mt-4 text-base font-semibold'>
+                  {t(item.titleKey)}
+                </h3>
                 <p className='text-muted-foreground mt-2 text-sm leading-relaxed'>
                   {t(item.descKey)}
                 </p>

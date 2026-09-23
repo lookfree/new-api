@@ -34,3 +34,9 @@ export const NOTIFICATION_METHODS = [
   { value: 'bark' as const, label: 'Bark' },
   { value: 'gotify' as const, label: 'Gotify' },
 ] as const
+
+/**
+ * DOM id of the notification settings card, so the preferences card can
+ * scroll to it.
+ */
+export const NOTIFICATION_SETTINGS_ID = 'notification-settings'

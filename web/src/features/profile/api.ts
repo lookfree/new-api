@@ -16,7 +16,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { api } from '@/lib/api'
+import { api, type ApiRequestConfig } from '@/lib/api'
 import type { CustomOAuthBinding } from '@/lib/oauth'
 import type { LoginSession } from '@/stores/auth-store'
 
@@ -58,9 +58,10 @@ export async function updateUserProfile(
  * Update user settings
  */
 export async function updateUserSettings(
-  data: UpdateUserSettingsRequest
+  data: UpdateUserSettingsRequest,
+  config?: ApiRequestConfig
 ): Promise<ApiResponse> {
-  const res = await api.put('/api/user/setting', data)
+  const res = await api.put('/api/user/setting', data, config)
   return res.data
 }
 

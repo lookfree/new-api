@@ -146,8 +146,8 @@ export function PhoneAuthForm(props: {
           control={form.control}
           name='phone'
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t('Phone number')}</FormLabel>
+            <FormItem className='gap-1.5'>
+              <FormLabel className='leading-5'>{t('Phone number')}</FormLabel>
               <FormControl>
                 <Input
                   className='h-10 px-3'
@@ -167,8 +167,10 @@ export function PhoneAuthForm(props: {
           control={form.control}
           name='code'
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t('Verification code')}</FormLabel>
+            <FormItem className='gap-1.5'>
+              <FormLabel className='leading-5'>
+                {t('Verification code')}
+              </FormLabel>
               <div className='flex gap-2'>
                 <FormControl>
                   <Input
@@ -182,7 +184,7 @@ export function PhoneAuthForm(props: {
                 <Button
                   type='button'
                   variant='outline'
-                  className='h-10 shrink-0'
+                  className='shrink-0'
                   onClick={handleSendCode}
                   disabled={isSending || isCoolingDown}
                 >

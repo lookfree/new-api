@@ -28,12 +28,33 @@ type SearchProps = {
   className?: string
   type?: React.HTMLInputTypeAttribute
   placeholder?: string
+  /** Icon-only button instead of the full-width search field. */
+  compact?: boolean
 }
 
-export function Search({ className = '', placeholder }: SearchProps) {
+export function Search({
+  className = '',
+  placeholder,
+  compact = false,
+}: SearchProps) {
   const { t } = useTranslation()
   const { setOpen } = useSearch()
   const resolvedPlaceholder = placeholder ?? t('Search')
+
+  if (compact) {
+    return (
+      <Button
+        variant='ghost'
+        size='icon-sm'
+        className={className}
+        onClick={() => setOpen(true)}
+        aria-label={resolvedPlaceholder}
+      >
+        <SearchIcon aria-hidden='true' />
+      </Button>
+    )
+  }
+
   return (
     <Button
       variant='outline'

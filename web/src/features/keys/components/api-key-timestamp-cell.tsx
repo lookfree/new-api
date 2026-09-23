@@ -16,52 +16,46 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
+import dayjs from 'dayjs'
+
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-import { formatTimestampRelative, formatTimestampToDate } from '@/lib/format'
+import { formatTimestampToDate } from '@/lib/format'
 import { cn } from '@/lib/utils'
 
 interface ApiKeyTimestampCellProps {
+  /** Unix seconds; 0 or -1 mean "never". */
   timestamp: number
-  now: number
-  locale?: string
-  justNowLabel: string
   className?: string
 }
 
 export function ApiKeyTimestampCell(props: ApiKeyTimestampCellProps) {
   if (!props.timestamp || props.timestamp === -1) {
-    return <span className='text-muted-foreground text-xs'>-</span>
+    return <span className='text-muted-foreground'>-</span>
   }
 
-  const timestampMs = props.timestamp * 1000
-  const isJustNow = timestampMs <= props.now && props.now - timestampMs < 60_000
-  const relativeTime = isJustNow
-    ? props.justNowLabel
-    : formatTimestampRelative(props.timestamp, 'seconds', props.locale)
-  const absoluteTime = formatTimestampToDate(props.timestamp)
+  const date = dayjs.unix(props.timestamp)
 
   return (
     <Tooltip>
       <TooltipTrigger
         render={
           <time
-            dateTime={new Date(timestampMs).toISOString()}
+            dateTime={date.toISOString()}
             tabIndex={0}
-            className={cn(
-              'block truncate font-mono text-xs tabular-nums',
-              props.className
-            )}
+            className={cn('tabular-nums', props.className)}
           />
         }
       >
-        {relativeTime}
+        {date.format('YYYY-MM-DD')}
       </TooltipTrigger>
       <TooltipContent>
-        <span className='font-mono tabular-nums'>{absoluteTime}</span>
+        <span className='font-mono tabular-nums'>
+          {formatTimestampToDate(props.timestamp)}
+        </span>
       </TooltipContent>
     </Tooltip>
   )

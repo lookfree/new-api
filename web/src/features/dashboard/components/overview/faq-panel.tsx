@@ -25,7 +25,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion'
-import { IconBadge } from '@/components/ui/icon-badge'
 import { Markdown } from '@/components/ui/markdown'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useFAQ } from '@/features/dashboard/hooks/use-status-data'
@@ -41,9 +40,7 @@ export function FAQPanel() {
     <PanelWrapper
       title={
         <span className='flex items-center gap-2'>
-          <IconBadge tone='chart-4' size='sm'>
-            <HelpCircle />
-          </IconBadge>
+          <HelpCircle className='text-primary size-4' aria-hidden='true' />
           {t('FAQ')}
         </span>
       }
@@ -52,26 +49,21 @@ export function FAQPanel() {
       empty={!list.length}
       emptyMessage={t('No FAQ entries available')}
       height='h-80'
-      contentClassName='p-0'
     >
       <ScrollArea className='h-80'>
-        <Accordion className='w-full px-4 sm:px-5'>
+        <Accordion className='w-full px-5'>
           {list.map((item: FAQItem, idx: number) => {
             const key = item.id ?? `faq-${idx}`
             const value = `item-${key}`
             return (
-              <AccordionItem
-                key={key}
-                value={value}
-                className='border-border/60'
-              >
+              <AccordionItem key={key} value={value} className='border-border'>
                 <AccordionTrigger className='text-start hover:no-underline'>
                   <Markdown className='text-sm leading-relaxed font-semibold'>
                     {item.question}
                   </Markdown>
                 </AccordionTrigger>
                 <AccordionContent>
-                  <Markdown className='text-muted-foreground/60 text-sm'>
+                  <Markdown className='text-muted-foreground text-sm'>
                     {item.answer}
                   </Markdown>
                 </AccordionContent>

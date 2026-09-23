@@ -123,8 +123,10 @@ export function WeChatSignInForm(props: {
         </p>
       </div>
 
-      <div className='grid gap-2'>
-        <Label htmlFor='wechat-code'>{t('Verification code')}</Label>
+      <div className='grid gap-1.5'>
+        <Label htmlFor='wechat-code' className='leading-5'>
+          {t('Verification code')}
+        </Label>
         <Input
           id='wechat-code'
           className='h-10 px-3'

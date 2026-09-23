@@ -17,28 +17,28 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import {
-  Activity,
   Box,
+  ChartColumn,
   CreditCard,
   FileText,
   FlaskConical,
-  Key,
-  LayoutDashboard,
+  Gauge,
+  Gift,
+  KeyRound,
+  LayoutGrid,
   ListTodo,
   MessageSquare,
   PlugZap,
   Radio,
   ServerCog,
   Settings,
+  Store,
   Ticket,
-  User,
   Users,
-  Wallet,
-  Gift,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
-import { type SidebarData } from '@/components/layout/types'
+import type { SidebarData } from '@/components/layout/types'
 import { ROLE } from '@/lib/roles'
 
 /**
@@ -53,8 +53,52 @@ export function useSidebarData(): SidebarData {
   return {
     navGroups: [
       {
-        id: 'chat',
-        title: t('Chat'),
+        // The prototype's console navigation, in prototype order and without a
+        // group heading.
+        id: 'console',
+        title: '',
+        items: [
+          {
+            title: t('Overview'),
+            url: '/dashboard/overview',
+            icon: LayoutGrid,
+          },
+          {
+            title: t('Model marketplace'),
+            url: '/marketplace',
+            icon: Store,
+          },
+          {
+            title: t('API Keys'),
+            url: '/keys',
+            icon: KeyRound,
+          },
+          {
+            title: t('Usage statistics'),
+            url: '/usage',
+            icon: Gauge,
+          },
+          {
+            title: t('Balance & top-up'),
+            url: '/wallet',
+            icon: CreditCard,
+          },
+          {
+            title: t('Refer & earn'),
+            url: '/invite',
+            icon: Gift,
+          },
+          {
+            title: t('Settings'),
+            url: '/profile',
+            icon: Settings,
+          },
+        ],
+      },
+      {
+        // Features the prototype has no page for; kept as they were.
+        id: 'tools',
+        title: t('More'),
         items: [
           {
             title: t('Playground'),
@@ -66,26 +110,10 @@ export function useSidebarData(): SidebarData {
             icon: MessageSquare,
             type: 'chat-presets',
           },
-        ],
-      },
-      {
-        id: 'general',
-        title: t('General'),
-        items: [
-          {
-            title: t('Overview'),
-            url: '/dashboard/overview',
-            icon: Activity,
-          },
           {
             title: t('Dashboard'),
             url: '/dashboard/models',
-            icon: LayoutDashboard,
-          },
-          {
-            title: t('API Keys'),
-            url: '/keys',
-            icon: Key,
+            icon: ChartColumn,
           },
           {
             title: t('Usage Logs'),
@@ -98,27 +126,6 @@ export function useSidebarData(): SidebarData {
             activeUrls: ['/usage-logs/drawing'],
             configUrls: ['/usage-logs/drawing', '/usage-logs/task'],
             icon: ListTodo,
-          },
-        ],
-      },
-      {
-        id: 'personal',
-        title: t('Personal'),
-        items: [
-          {
-            title: t('Wallet'),
-            url: '/wallet',
-            icon: Wallet,
-          },
-          {
-            title: t('Refer & earn'),
-            url: '/invite',
-            icon: Gift,
-          },
-          {
-            title: t('Profile'),
-            url: '/profile',
-            icon: User,
           },
         ],
       },

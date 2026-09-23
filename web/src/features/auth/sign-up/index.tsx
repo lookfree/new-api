@@ -17,10 +17,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { Link } from '@tanstack/react-router'
-import { useState } from 'react'
+import { Check } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useStatus } from '@/hooks/use-status'
@@ -28,9 +28,10 @@ import { useSystemConfig } from '@/hooks/use-system-config'
 import { cn } from '@/lib/utils'
 
 import { AuthLayout } from '../auth-layout'
+import { OAuthProviders } from '../components/oauth-providers'
 import { PhoneAuthForm } from '../components/phone-auth-form'
-import { getAffiliateCode } from '../lib/storage'
 import { resolveSignInMethods, type SignInMethod } from '../lib/sign-in-methods'
+import { getAffiliateCode, saveAffiliateCode } from '../lib/storage'
 import { SignUpForm } from './components/sign-up-form'
 
 // WeChat registration already works from the email tab's "continue with"
@@ -40,6 +41,18 @@ import { SignUpForm } from './components/sign-up-form'
 const METHOD_LABEL_KEYS: Partial<Record<SignInMethod, string>> = {
   phone: 'Phone',
   email: 'Email',
+}
+
+/**
+ * Referral links carry the code as `?aff=` (the prototype's links use
+ * `?invite=`, accepted too). It has to be read here rather than left to the
+ * email form: the phone tab is the default and never mounts that form, so a
+ * referred visitor signing up by phone would otherwise lose the code.
+ */
+function readInviteCode(): string {
+  const params = new URLSearchParams(window.location.search)
+  const fromLink = (params.get('aff') ?? params.get('invite') ?? '').trim()
+  return fromLink || getAffiliateCode()
 }
 
 export function SignUp() {
@@ -59,23 +72,46 @@ export function SignUp() {
   const [selected, setSelected] = useState<SignInMethod | null>(null)
   const method = selected && methods.includes(selected) ? selected : methods[0]
 
-  const [inviteCode, setInviteCode] = useState(() => getAffiliateCode())
+  const [inviteCode, setInviteCode] = useState(readInviteCode)
+  useEffect(() => {
+    saveAffiliateCode(inviteCode)
+  }, [inviteCode])
 
   const [agreed, setAgreed] = useState(false)
   const [agreementError, setAgreementError] = useState(false)
   const requireAgreement = () => setAgreementError(true)
+  const guardAgreement = () => {
+    if (!agreed) setAgreementError(true)
+    return agreed
+  }
+
+  const inviteField = (
+    <div>
+      <Label htmlFor='invite-code' className='leading-5'>
+        {t('Invite code')} ({t('optional')})
+      </Label>
+      <Input
+        id='invite-code'
+        value={inviteCode}
+        onChange={(event) => setInviteCode(event.target.value.trim())}
+        placeholder='ZT-XXXXXX'
+        className='mt-1.5 h-10 px-3 font-mono'
+      />
+    </div>
+  )
 
   const agreement = (
     <div className='space-y-1.5'>
       <label className='text-muted-foreground flex items-start gap-2 text-xs leading-relaxed'>
-        <Checkbox
+        <input
+          type='checkbox'
           checked={agreed}
-          onCheckedChange={(value) => {
-            setAgreed(value === true)
-            if (value === true) setAgreementError(false)
+          onChange={(event) => {
+            setAgreed(event.target.checked)
+            if (event.target.checked) setAgreementError(false)
           }}
           aria-invalid={agreementError}
-          className='mt-0.5'
+          className='accent-primary mt-0.5 size-4 shrink-0'
         />
         <span>
           {t('I have read and agree to the')}{' '}
@@ -110,11 +146,19 @@ export function SignUp() {
         {t('Create your {{name}} account', { name: systemName })}
       </h1>
       <p className='text-muted-foreground mt-1 text-sm'>
-        {t('Already have an account?')}{' '}
-        <Link to='/sign-in' className='text-primary font-medium hover:underline'>
-          {t('Sign in')}
-        </Link>
+        {t('Set up your account in a few steps. Pay as you go.')}
       </p>
+
+      {inviteCode && (
+        <div className='border-success/30 bg-success/10 text-success mt-4 flex items-center gap-2 rounded-lg border px-3 py-2 text-sm'>
+          <Check className='size-4 shrink-0' aria-hidden='true' />
+          <span>
+            {t('Invite code applied')}
+            {i18n.language.startsWith('zh') ? '：' : ': '}
+            <span className='font-mono font-medium'>{inviteCode}</span>
+          </span>
+        </div>
+      )}
 
       {methods.length > 1 && (
         <div
@@ -144,31 +188,40 @@ export function SignUp() {
 
       <div className='mt-5'>
         {method === 'phone' ? (
-          <div className='grid gap-4'>
-            <div>
-              <Label htmlFor='invite-code'>
-                {t('Invite code')} ({t('optional')})
-              </Label>
-              <Input
-                id='invite-code'
-                value={inviteCode}
-                onChange={(event) => setInviteCode(event.target.value.trim())}
-                placeholder='ZT-XXXXXX'
-                className='mt-1.5 font-mono'
-              />
-            </div>
-            <PhoneAuthForm
-              affCode={inviteCode || undefined}
-              agreed={agreed}
-              agreement={agreement}
-              onRequireAgreement={requireAgreement}
-              submitLabel={t('Create account')}
-            />
-          </div>
+          <PhoneAuthForm
+            affCode={inviteCode || undefined}
+            agreed={agreed}
+            agreement={
+              <>
+                {inviteField}
+                {agreement}
+              </>
+            }
+            onRequireAgreement={requireAgreement}
+            submitLabel={t('Sign up & open console')}
+          />
         ) : (
-          <SignUpForm />
+          <SignUpForm affiliateField={inviteField} />
         )}
       </div>
+
+      {method === 'phone' && (
+        <OAuthProviders
+          status={status}
+          onBeforeLogin={guardAgreement}
+          className='mt-5'
+        />
+      )}
+
+      <p className='text-muted-foreground mt-6 text-center text-sm'>
+        {t('Already have an account?')}{' '}
+        <Link
+          to='/sign-in'
+          className='text-primary font-medium hover:underline'
+        >
+          {t('Go to sign in')}
+        </Link>
+      </p>
     </AuthLayout>
   )
 }

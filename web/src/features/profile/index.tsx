@@ -16,29 +16,55 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-import { Main } from '@/components/layout'
-import {
-  CardStaggerContainer,
-  CardStaggerItem,
-} from '@/components/page-transition'
+import { useQueryClient } from '@tanstack/react-query'
+import { Loader2 } from 'lucide-react'
+import { useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
+
+import { ConsolePage, ConsolePageHeader } from '@/components/layout'
+import { Button } from '@/components/ui/button'
+import { SELF_QUERY_KEY } from '@/hooks/use-self'
 import { useStatus } from '@/hooks/use-status'
 import { useAuthStore } from '@/stores/auth-store'
 
+import { AccountBindingsCard } from './components/account-bindings-card'
 import { CheckinCalendarCard } from './components/checkin-calendar-card'
-import { LanguagePreferencesCard } from './components/language-preferences-card'
+import { EmailBindDialog } from './components/dialogs/email-bind-dialog'
 import { LoginSessionsCard } from './components/login-sessions-card'
+import { NotificationSettingsCard } from './components/notification-settings-card'
 import { PasskeyCard } from './components/passkey-card'
-import { ProfileHeader } from './components/profile-header'
+import { PreferencesCard } from './components/preferences-card'
+import { ProfileBasicsCard } from './components/profile-basics-card'
+import { ProfileCardSkeleton } from './components/profile-card'
 import { ProfileSecurityCard } from './components/profile-security-card'
-import { ProfileSettingsCard } from './components/profile-settings-card'
 import { SidebarModulesCard } from './components/sidebar-modules-card'
 import { TwoFACard } from './components/two-fa-card'
 import { useProfile } from './hooks'
 
+/**
+ * Account settings, laid out like the prototype's settings view: the profile
+ * and preferences cards with one save button, then the account features the
+ * prototype has no page for (bindings, notification channels, security,
+ * sessions, passkey, 2FA, check-in, sidebar) as cards of the same style.
+ */
 export function Profile() {
-  const { profile, loading, refreshProfile } = useProfile()
+  const { t } = useTranslation()
+  const queryClient = useQueryClient()
+  const { profile, loading, updating, refreshProfile, updateProfile } =
+    useProfile()
   const { status } = useStatus()
-  const permissions = useAuthStore((s) => s.auth.user?.permissions)
+  const authUser = useAuthStore((s) => s.auth.user)
+  const setAuthUser = useAuthStore((s) => s.auth.setUser)
+  const permissions = authUser?.permissions
+  const [displayNameDraft, setDisplayNameDraft] = useState<string | null>(null)
+  const [emailDialogOpen, setEmailDialogOpen] = useState(false)
+
+  const savedDisplayName = profile?.display_name ?? ''
+  const displayName = displayNameDraft ?? savedDisplayName
+  const trimmedDisplayName = displayName.trim()
+  const dirty =
+    displayNameDraft !== null && trimmedDisplayName !== savedDisplayName
 
   const checkinEnabled = status?.checkin_enabled === true
   const turnstileEnabled = !!(
@@ -47,46 +73,99 @@ export function Profile() {
   const turnstileSiteKey = status?.turnstile_site_key || ''
   const canConfigureSidebar = permissions?.sidebar_settings !== false
 
+  // The account menu reads the name from the auth store, which is only filled
+  // at sign-in, so mirror what the server now says about the profile.
+  useEffect(() => {
+    if (!profile || !authUser) return
+    if (
+      authUser.display_name === profile.display_name &&
+      authUser.email === profile.email
+    ) {
+      return
+    }
+    setAuthUser({
+      ...authUser,
+      display_name: profile.display_name,
+      email: profile.email,
+    })
+  }, [profile, authUser, setAuthUser])
+
+  // Everything that shows the balance or the name reads the shared "self"
+  // query, so a profile change must invalidate it as well as reload this page.
+  const refresh = useCallback(async () => {
+    await refreshProfile()
+    await queryClient.invalidateQueries({ queryKey: SELF_QUERY_KEY })
+  }, [refreshProfile, queryClient])
+
+  async function handleSave() {
+    if (!dirty) {
+      toast.info(t('No changes to save'))
+      return
+    }
+    // The server ignores an empty name instead of clearing it, so saving one
+    // would report success while changing nothing.
+    if (trimmedDisplayName === '') {
+      toast.error(t('Nickname cannot be empty'))
+      return
+    }
+    const saved = await updateProfile({ display_name: trimmedDisplayName })
+    if (saved) {
+      setDisplayNameDraft(null)
+      await queryClient.invalidateQueries({ queryKey: SELF_QUERY_KEY })
+    }
+  }
+
   return (
-    <Main>
-      <div className='min-h-0 flex-1 overflow-auto px-3 py-3 sm:px-4 sm:py-6'>
-        <CardStaggerContainer className='mx-auto flex w-full max-w-7xl flex-col gap-4 sm:gap-6'>
-          <CardStaggerItem>
-            <ProfileHeader profile={profile} loading={loading} />
-          </CardStaggerItem>
+    <ConsolePage>
+      <ConsolePageHeader title={t('Settings')} />
 
-          <CardStaggerItem>
-            <div className='grid gap-4 sm:gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(360px,0.46fr)] xl:items-start'>
-              <div className='space-y-4 sm:space-y-6'>
-                <ProfileSettingsCard
-                  profile={profile}
-                  loading={loading}
-                  onProfileUpdate={refreshProfile}
-                />
-                <LanguagePreferencesCard
-                  profile={profile}
-                  onProfileUpdate={refreshProfile}
-                />
-                <ProfileSecurityCard profile={profile} loading={loading} />
-                <LoginSessionsCard />
-              </div>
+      <ProfileBasicsCard
+        profile={profile}
+        loading={loading}
+        displayName={displayName}
+        onDisplayNameChange={setDisplayNameDraft}
+        onEditEmail={() => setEmailDialogOpen(true)}
+      />
+      <PreferencesCard
+        profile={profile}
+        loading={loading}
+        onProfileUpdate={refresh}
+        onBindEmail={() => setEmailDialogOpen(true)}
+      />
 
-              <div className='space-y-4 sm:space-y-6 xl:sticky xl:top-6'>
-                {checkinEnabled && (
-                  <CheckinCalendarCard
-                    checkinEnabled={checkinEnabled}
-                    turnstileEnabled={turnstileEnabled}
-                    turnstileSiteKey={turnstileSiteKey}
-                  />
-                )}
-                {canConfigureSidebar && <SidebarModulesCard />}
-                <PasskeyCard loading={loading} />
-                <TwoFACard loading={loading} />
-              </div>
-            </div>
-          </CardStaggerItem>
-        </CardStaggerContainer>
+      <div className='flex justify-end'>
+        <Button onClick={handleSave} disabled={updating}>
+          {updating && <Loader2 className='animate-spin' />}
+          {t('Save changes')}
+        </Button>
       </div>
-    </Main>
+
+      <AccountBindingsCard profile={profile} onUpdate={refresh} />
+      {loading && <ProfileCardSkeleton rows={3} />}
+      {profile && (
+        <NotificationSettingsCard profile={profile} onUpdate={refresh} />
+      )}
+      <ProfileSecurityCard profile={profile} loading={loading} />
+      <LoginSessionsCard />
+      <div className='grid gap-6 md:grid-cols-2 md:items-start'>
+        <PasskeyCard loading={loading} />
+        <TwoFACard loading={loading} />
+      </div>
+      {checkinEnabled && (
+        <CheckinCalendarCard
+          checkinEnabled={checkinEnabled}
+          turnstileEnabled={turnstileEnabled}
+          turnstileSiteKey={turnstileSiteKey}
+        />
+      )}
+      {canConfigureSidebar && <SidebarModulesCard />}
+
+      <EmailBindDialog
+        open={emailDialogOpen}
+        onOpenChange={setEmailDialogOpen}
+        currentEmail={profile?.email}
+        onSuccess={refresh}
+      />
+    </ConsolePage>
   )
 }

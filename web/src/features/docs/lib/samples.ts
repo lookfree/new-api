@@ -23,15 +23,12 @@ For commercial licensing, please contact support@quantumnous.com
  * copy a snippet straight out of the page and have it hit this deployment.
  */
 
-import type { BundledLanguage } from 'shiki/bundle/web'
-
 export type DocsSample = {
   label: string
-  language: BundledLanguage
   code: string
 }
 
-/** Model id used throughout the samples when the catalog is still empty. */
+/** Model id used in the samples when the catalog is still empty. */
 export const FALLBACK_SAMPLE_MODEL = 'gpt-4o-mini'
 
 export function buildCallSamples(
@@ -44,7 +41,6 @@ export function buildCallSamples(
   return [
     {
       label: 'cURL',
-      language: 'bash',
       code: `curl ${v1}/chat/completions \\
   -H "Authorization: Bearer $API_KEY" \\
   -H "Content-Type: application/json" \\
@@ -55,7 +51,6 @@ export function buildCallSamples(
     },
     {
       label: 'Python',
-      language: 'python',
       code: `from openai import OpenAI
 
 client = OpenAI(
@@ -71,7 +66,6 @@ print(resp.choices[0].message.content)`,
     },
     {
       label: 'Node.js',
-      language: 'javascript',
       code: `import OpenAI from 'openai'
 
 const client = new OpenAI({
@@ -84,17 +78,6 @@ const resp = await client.chat.completions.create({
   messages: [{ role: 'user', content: 'Hello' }],
 })
 console.log(resp.choices[0].message.content)`,
-    },
-  ]
-}
-
-export function buildModelListSample(baseUrl: string): DocsSample[] {
-  return [
-    {
-      label: 'cURL',
-      language: 'bash',
-      code: `curl ${baseUrl}/v1/models \\
-  -H "Authorization: Bearer $API_KEY"`,
     },
   ]
 }

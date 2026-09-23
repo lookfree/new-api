@@ -18,7 +18,8 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import {
   PAYMENT_TYPES,
-  DEFAULT_PRESET_MULTIPLIERS,
+  DEFAULT_PRESET_AMOUNTS,
+  DEFAULT_SELECTED_AMOUNT,
   DEFAULT_PAYMENT_TYPE,
   DEFAULT_MIN_TOPUP,
 } from '../constants'
@@ -93,10 +94,21 @@ export function isWaffoPancakePayment(paymentType: string): boolean {
   return paymentType === PAYMENT_TYPES.WAFFO_PANCAKE
 }
 
+/**
+ * Check if payment method is Airwallex
+ *
+ * Airwallex hosts its own checkout page and is opened through its SDK from a
+ * PaymentIntent, not through the generic epay form submission.
+ */
+export function isAirwallexPayment(paymentType: string): boolean {
+  return paymentType === PAYMENT_TYPES.AIRWALLEX
+}
+
 export interface PaymentProcessors {
   regular: (topupAmount: number, paymentType: string) => Promise<boolean>
   waffo: (topupAmount: number, payMethodIndex: number) => Promise<boolean>
   waffoPancake: (topupAmount: number) => Promise<boolean>
+  airwallex: (topupAmount: number) => Promise<boolean>
 }
 
 export async function dispatchSelectedPayment(
@@ -114,6 +126,10 @@ export async function dispatchSelectedPayment(
 
   if (isWaffoPancakePayment(paymentMethod.type)) {
     return processors.waffoPancake(topupAmount)
+  }
+
+  if (isAirwallexPayment(paymentMethod.type)) {
+    return processors.airwallex(topupAmount)
   }
 
   return processors.regular(topupAmount, paymentMethod.type)
@@ -144,6 +160,10 @@ export function getDefaultPaymentType(topupInfo: TopupInfo | null): string {
     return PAYMENT_TYPES.WAFFO_PANCAKE
   }
 
+  if (topupInfo.enable_airwallex_topup) {
+    return PAYMENT_TYPES.AIRWALLEX
+  }
+
   return DEFAULT_PAYMENT_TYPE
 }
 
@@ -171,16 +191,37 @@ export function getMinTopupAmount(topupInfo: TopupInfo | null): number {
     return topupInfo.waffo_pancake_min_topup || DEFAULT_MIN_TOPUP
   }
 
+  // Airwallex has no minimum of its own: the server applies the general one.
+  if (topupInfo.enable_airwallex_topup) {
+    return topupInfo.min_topup || DEFAULT_MIN_TOPUP
+  }
+
   return DEFAULT_MIN_TOPUP
 }
 
 /**
- * Generate preset amounts based on minimum topup
+ * Preset amounts to offer when none are configured: the defaults that are not
+ * below the minimum top-up.
  */
 export function generatePresetAmounts(minAmount: number): PresetAmount[] {
-  return DEFAULT_PRESET_MULTIPLIERS.map((multiplier) => ({
-    value: minAmount * multiplier,
-  }))
+  return DEFAULT_PRESET_AMOUNTS.filter((value) => value >= minAmount).map(
+    (value) => ({ value })
+  )
+}
+
+/**
+ * The amount the page opens with: the default preset when it is on offer,
+ * otherwise the smallest preset that meets the minimum, otherwise the minimum.
+ */
+export function getInitialTopupAmount(
+  presets: PresetAmount[],
+  minAmount: number
+): number {
+  const eligible = presets
+    .map((preset) => preset.value)
+    .filter((value) => value >= minAmount)
+  if (eligible.includes(DEFAULT_SELECTED_AMOUNT)) return DEFAULT_SELECTED_AMOUNT
+  return eligible.length > 0 ? Math.min(...eligible) : minAmount
 }
 
 /**

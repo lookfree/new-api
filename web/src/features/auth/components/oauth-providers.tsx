@@ -93,7 +93,7 @@ export function OAuthProviders({
   if (status?.github_oauth) {
     providerButtons.push({
       key: 'github',
-      label: githubButtonText || 'GitHub',
+      label: githubButtonDisabled ? githubButtonText : 'GitHub',
       onClick: handleGitHubLogin,
       icon: <IconGithub className='h-4 w-4' />,
       disabled: githubButtonDisabled,

@@ -24,9 +24,11 @@ For commercial licensing, please contact support@quantumnous.com
  * forwards to the configured inbox. Either half degrades on its own: with no
  * channels configured the page is just the form, and with no inbox configured
  * the form is replaced by a short note rather than a control that fails.
+ * Layout follows the Zetone prototype: centered heading, channel cards on the
+ * left, the message form on the right.
  */
 
-import { Building2, Mail, MessageCircle, Phone } from 'lucide-react'
+import { Mail, MessageCircle, Phone } from 'lucide-react'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -34,6 +36,7 @@ import { PublicLayout } from '@/components/layout'
 import { PageTransition } from '@/components/page-transition'
 import { Card, CardContent } from '@/components/ui/card'
 import { useStatus } from '@/hooks/use-status'
+import { cn } from '@/lib/utils'
 
 import { ContactForm } from './components/contact-form'
 import { parseContactChannels } from './lib/channels'
@@ -42,7 +45,7 @@ import type { ContactChannel } from './types'
 const CHANNEL_ICONS = {
   email: Mail,
   phone: Phone,
-  wecom: Building2,
+  wecom: MessageCircle,
   wechat: MessageCircle,
 } as const
 
@@ -58,56 +61,56 @@ export function Contact() {
   const formEnabled = Boolean(record?.contact_form_enabled)
 
   return (
-    <PublicLayout showMainContainer={false}>
-      <PageTransition className='mx-auto w-full max-w-5xl px-4 pt-16 pb-16 sm:px-6 sm:pt-20'>
-        <header className='mb-10 max-w-2xl'>
-          <h1 className='text-[clamp(1.875rem,4vw,2.5rem)] leading-tight font-bold tracking-tight'>
+    <PublicLayout showMainContainer={false} showFooter>
+      <PageTransition className='mx-auto w-full max-w-6xl px-4 pt-[calc(57px+3rem)] pb-12 md:pt-[calc(57px+4rem)] md:pb-16'>
+        <div className='mx-auto max-w-2xl text-center'>
+          <h1 className='text-3xl font-semibold tracking-tight text-balance md:text-4xl'>
             {t('Contact us')}
           </h1>
-          <p className='text-muted-foreground/80 mt-3 leading-relaxed'>
+          <p className='text-muted-foreground mt-3 leading-relaxed text-pretty'>
             {t(
               'Technical questions, partnerships or feedback — we would love to hear from you.'
             )}
           </p>
-        </header>
+        </div>
 
-        <div className='grid gap-8 lg:grid-cols-[minmax(0,340px)_minmax(0,1fr)]'>
+        <div
+          className={cn(
+            'mt-10 grid gap-6',
+            channels.length > 0
+              ? 'md:grid-cols-[1fr_1.4fr]'
+              : 'mx-auto max-w-2xl'
+          )}
+        >
           {channels.length > 0 && (
-            <section aria-labelledby='contact-channels'>
-              <h2
-                id='contact-channels'
-                className='text-muted-foreground mb-3 text-xs font-semibold tracking-wide uppercase'
-              >
-                {t('Get in touch')}
-              </h2>
-              <div className='flex flex-col gap-3'>
-                {channels.map((channel) => (
-                  <ChannelCard
-                    key={`${channel.kind}-${channel.label}`}
-                    channel={channel}
-                  />
-                ))}
-              </div>
-            </section>
+            <div aria-label={t('Get in touch')} className='flex flex-col gap-4'>
+              {channels.map((channel) => (
+                <ChannelCard
+                  key={`${channel.kind}-${channel.label}`}
+                  channel={channel}
+                />
+              ))}
+            </div>
           )}
 
-          <section aria-labelledby='contact-form'>
-            <h2
-              id='contact-form'
-              className='text-muted-foreground mb-3 text-xs font-semibold tracking-wide uppercase'
-            >
-              {t('Send a message')}
-            </h2>
-            {formEnabled ? (
-              <ContactForm />
-            ) : (
-              <p className='text-muted-foreground bg-muted/40 rounded-lg border px-4 py-6 text-sm leading-relaxed'>
-                {t(
-                  'The message form is not configured yet. Please reach us through one of the channels listed here.'
-                )}
-              </p>
-            )}
-          </section>
+          <Card className='py-6'>
+            <CardContent>
+              {formEnabled ? (
+                <ContactForm />
+              ) : (
+                <>
+                  <h2 className='mb-4 text-lg font-semibold'>
+                    {t('Send a message')}
+                  </h2>
+                  <p className='text-muted-foreground bg-muted/40 rounded-lg border px-4 py-6 text-sm leading-relaxed'>
+                    {t(
+                      'The message form is not configured yet. Please reach us through one of the channels listed here.'
+                    )}
+                  </p>
+                </>
+              )}
+            </CardContent>
+          </Card>
         </div>
       </PageTransition>
     </PublicLayout>
@@ -118,20 +121,28 @@ function ChannelCard(props: { channel: ContactChannel }) {
   const Icon = CHANNEL_ICONS[props.channel.kind]
   return (
     <Card>
-      <CardContent className='flex items-start gap-3 p-4'>
-        <span className='bg-primary/10 text-primary flex size-9 shrink-0 items-center justify-center rounded-lg'>
-          <Icon className='size-4' aria-hidden='true' />
-        </span>
+      <CardContent className='flex items-center gap-4'>
+        {props.channel.qr ? (
+          <img
+            src={props.channel.qr}
+            alt={props.channel.label}
+            className='bg-card size-[72px] shrink-0 rounded-lg border object-contain p-1 shadow-sm'
+          />
+        ) : (
+          <span className='bg-primary/10 text-primary flex size-10 shrink-0 items-center justify-center rounded-lg'>
+            <Icon className='size-5' aria-hidden='true' />
+          </span>
+        )}
         <div className='min-w-0'>
           <p className='text-muted-foreground text-sm'>{props.channel.label}</p>
-          <p className='font-medium break-all'>{props.channel.value}</p>
-          {props.channel.qr && (
-            <img
-              src={props.channel.qr}
-              alt={props.channel.label}
-              className='border-border mt-3 size-28 rounded-md border object-contain'
-            />
-          )}
+          <p
+            className={cn(
+              props.channel.qr ? 'text-sm' : 'text-base font-medium',
+              'break-all'
+            )}
+          >
+            {props.channel.value}
+          </p>
         </div>
       </CardContent>
     </Card>

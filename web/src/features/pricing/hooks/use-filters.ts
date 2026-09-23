@@ -54,7 +54,8 @@ function normalizeViewMode(value: unknown): ViewMode {
 }
 
 export function useFilters(models: PricingModel[]) {
-  const search = useSearch({ from: '/pricing/' })
+  // Not bound to /pricing so the console marketplace route can share it.
+  const search: FilterState = useSearch({ strict: false })
   const [filterState, setFilterState] = useState<FilterState>(() => ({
     search: search.search,
     sort: search.sort,

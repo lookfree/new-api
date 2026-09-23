@@ -48,7 +48,7 @@ export function HomeModelCard(props: {
     <Link
       to='/pricing'
       search={{ search: model.model_name }}
-      className='bg-card text-card-foreground hover:border-primary/40 group flex flex-col rounded-xl border p-5 shadow-xs transition-colors'
+      className='bg-card text-card-foreground hover:border-primary/40 group flex flex-col rounded-lg border p-5 shadow-sm transition-colors'
     >
       <div className='flex items-center gap-3'>
         <span className='bg-primary/10 text-primary flex size-10 shrink-0 items-center justify-center rounded-lg font-mono text-sm font-semibold'>
@@ -69,7 +69,7 @@ export function HomeModelCard(props: {
           {tags.map((tag) => (
             <span
               key={tag}
-              className='bg-muted text-muted-foreground rounded-md px-2 py-0.5 text-xs font-medium'
+              className='bg-muted text-muted-foreground rounded-md border border-transparent px-2 py-0.5 text-xs font-medium'
             >
               {tag}
             </span>

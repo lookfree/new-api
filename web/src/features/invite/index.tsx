@@ -25,7 +25,15 @@ For commercial licensing, please contact support@quantumnous.com
  */
 
 import { useQuery } from '@tanstack/react-query'
-import { Check, Copy, Users } from 'lucide-react'
+import {
+  Check,
+  Copy,
+  Gift,
+  TrendingUp,
+  Users,
+  Wallet,
+  type LucideIcon,
+} from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -56,19 +64,22 @@ export function Invite() {
   // figure and the table below it can never disagree.
   const toppedUpCount = records.filter((record) => record.topped_up).length
 
-  const stats = [
+  const stats: { label: string; value: string; icon: LucideIcon }[] = [
     {
       label: t('Total invited'),
       value: String(recordsQuery.data?.data?.total ?? 0),
+      icon: Users,
     },
-    { label: t('Topped up'), value: String(toppedUpCount) },
+    { label: t('Topped up'), value: String(toppedUpCount), icon: TrendingUp },
     {
       label: t('Total reward'),
       value: formatQuota(Number(user?.aff_history_quota ?? 0)),
+      icon: Gift,
     },
     {
       label: t('Withdrawable'),
       value: formatQuota(Number(user?.aff_quota ?? 0)),
+      icon: Wallet,
     },
   ]
 
@@ -141,11 +152,16 @@ export function Invite() {
       <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
         {stats.map((stat) => (
           <Card key={stat.label}>
-            <CardContent className='p-5'>
-              <p className='text-muted-foreground text-sm'>{stat.label}</p>
-              <p className='mt-1 text-2xl font-bold tracking-tight tabular-nums'>
-                {stat.value}
-              </p>
+            <CardContent className='flex items-start justify-between gap-3 p-5'>
+              <div className='min-w-0'>
+                <p className='text-muted-foreground text-sm'>{stat.label}</p>
+                <p className='mt-1 text-2xl font-bold tracking-tight tabular-nums'>
+                  {stat.value}
+                </p>
+              </div>
+              <span className='bg-primary/10 text-primary flex size-9 shrink-0 items-center justify-center rounded-lg'>
+                <stat.icon className='size-4' aria-hidden='true' />
+              </span>
             </CardContent>
           </Card>
         ))}
